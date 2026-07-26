@@ -1,0 +1,22 @@
+# === 敏感信息：绝不提交 ===
+.env
+*.env
+serve.log
+
+# === 大二进制资源：不纳入 git（体积大、可再生成） ===
+# 原始/裁剪 PNG 色卡
+v5/*.png
+v6/*.png
+# WebP 色卡（由 PNG 转换生成）
+v5/*.webp
+v6/*.webp
+# 生成的 PDF
+*.pdf
+
+# === 备份/临时文件 ===
+data.js.png-backup
+*-backup
+_*.py
+_keycheck/
+__pycache__/
+*.pyc
