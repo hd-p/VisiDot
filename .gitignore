@@ -16,6 +16,8 @@ v6/*.webp
 # === 备份/临时文件 ===
 data.js.png-backup
 *-backup
+*.pre-aurora
+*.bak
 _*.py
 _keycheck/
 __pycache__/
