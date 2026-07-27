@@ -146,6 +146,9 @@
   .mode-card:hover { border-color: var(--primary); box-shadow: var(--shadow); transform: translateY(-2px); }
   .mode-card:active { transform: translateY(0) scale(0.99); }
   .mode-card:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }
+  .mode-card.selected { border-color: var(--primary); background: var(--primary-dim); }
+  .mode-card.selected .mode-arrow { color: var(--primary); }
+  .config-hint { font-size: 12.5px; color: var(--fg-muted); margin-top: 8px; line-height: 1.5; }
   .mode-icon { width: 52px; height: 52px; border-radius: 15px; display: grid; place-items: center; flex-shrink: 0; }
   .mode-icon svg { width: 26px; height: 26px; }
   .mode-icon.test { background: var(--primary-dim); color: var(--primary); }
@@ -219,7 +222,8 @@
     border: 3px solid var(--surface-3); border-top-color: var(--primary); animation: spin .8s linear infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .plate-stage img.loaded + .spinner { display: none; }
+  /* spinner 的显隐由 renderQuestion 的 onload/onerror 内联控制（遮罩层插在 img 与 spinner 之间，
+     相邻兄弟选择器已不适用） */
 
   .question-title { font-size: 16px; font-weight: 700; text-align: center; padding: 2px 4px; }
   .question-title .hint { display: block; font-size: 13px; font-weight: 500; color: var(--fg-muted); margin-top: 2px; }
@@ -307,6 +311,71 @@
   .footer-note a:hover { text-decoration: underline; }
 
   .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+
+  /* ---------------- Toggle switch (随机题库开关) ---------------- */
+  .switch-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .switch-row .switch-text { min-width: 0; }
+  .switch-row .switch-text .t { font-size: 14px; font-weight: 600; color: var(--fg); }
+  .switch-row .switch-text .d { font-size: 12.5px; color: var(--fg-muted); margin-top: 1px; }
+  .switch {
+    position: relative; flex-shrink: 0; width: 50px; height: 30px; border-radius: 999px;
+    background: var(--surface-3); border: none; cursor: pointer; transition: background .2s ease; padding: 0;
+  }
+  .switch::after {
+    content: ''; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%;
+    background: #fff; box-shadow: var(--shadow-sm); transition: transform .2s cubic-bezier(.4,0,.2,1);
+  }
+  .switch[aria-checked="true"] { background: var(--primary); }
+  .switch[aria-checked="true"]::after { transform: translateX(20px); }
+  .switch:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }
+
+  /* ---------------- 考试倒计时条 ---------------- */
+  .timer-wrap { display: flex; flex-direction: column; gap: 6px; }
+  .timer-meta { display: flex; align-items: center; justify-content: space-between; font-size: 13px; }
+  .timer-label { display: flex; align-items: center; gap: 6px; color: var(--fg-muted); font-weight: 600; }
+  .timer-label svg { width: 15px; height: 15px; }
+  .timer-val { font-family: 'Figtree', sans-serif; font-weight: 800; font-size: 16px; color: var(--primary); font-variant-numeric: tabular-nums; }
+  .timer-bar { height: 8px; border-radius: 999px; background: var(--surface-3); overflow: hidden; }
+  .timer-bar span { display: block; height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); border-radius: 999px; transition: width 1s linear; }
+  .timer-wrap.urgent .timer-val { color: var(--danger-fg); }
+  .timer-wrap.urgent .timer-bar span { background: var(--danger); transition: width 1s linear; }
+
+  /* ---------------- 滤色遮罩 (练习) ---------------- */
+  .mask-overlay {
+    position: absolute; inset: 0; z-index: 5; pointer-events: none;
+    opacity: 0; mix-blend-mode: multiply; background: #10b981;
+  }
+  .mask-panel { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 12px; }
+  .mask-buttons { display: flex; gap: 10px; }
+  .mask-btn {
+    flex: 1; border: 1.5px solid transparent; padding: 11px; border-radius: var(--radius-sm);
+    font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Figtree', sans-serif; transition: all .2s ease;
+    display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px;
+  }
+  .mask-btn .swatch { width: 13px; height: 13px; border-radius: 50%; }
+  .mask-btn.green { background: #d1fae5; color: #059669; }
+  .mask-btn.green .swatch { background: #10b981; }
+  .mask-btn.green[aria-pressed="true"] { background: #10b981; color: #fff; }
+  .mask-btn.green[aria-pressed="true"] .swatch { background: #fff; }
+  .mask-btn.red { background: #fee2e2; color: #dc2626; }
+  .mask-btn.red .swatch { background: #ef4444; }
+  .mask-btn.red[aria-pressed="true"] { background: #ef4444; color: #fff; }
+  .mask-btn.red[aria-pressed="true"] .swatch { background: #fff; }
+  [data-theme="dark"] .mask-btn.green { background: rgba(16,185,129,0.16); color: #6ee7b7; }
+  [data-theme="dark"] .mask-btn.red { background: rgba(239,68,68,0.16); color: #fca5a5; }
+  .mask-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }
+  .mask-tuner { display: flex; flex-direction: column; gap: 13px; }
+  .slider-row { display: flex; flex-direction: column; gap: 5px; }
+  .slider-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 12.5px; font-weight: 600; color: var(--fg-muted); }
+  .slider-head .val { font-variant-numeric: tabular-nums; color: var(--fg); font-weight: 700; }
+  input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 999px; background: var(--surface-3); outline: none; cursor: pointer; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; border-radius: 50%; background: var(--primary); border: 3px solid var(--surface); box-shadow: var(--shadow-sm); cursor: pointer; }
+  input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: var(--primary); border: 3px solid var(--surface); box-shadow: var(--shadow-sm); cursor: pointer; }
+  input[type=range]:focus-visible { box-shadow: 0 0 0 3px var(--ring); }
+  .tuner-reset { align-self: flex-start; background: transparent; color: var(--fg-muted); border: 1px solid var(--border); padding: 7px 15px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all .2s ease; min-height: 40px; }
+  .tuner-reset:hover { border-color: var(--primary); color: var(--primary); }
+  .tuner-reset:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }
+  .mode-icon.exam { background: var(--danger-dim); color: var(--danger-fg); }
 </style>
 </head>
 <body>
@@ -340,24 +409,24 @@
       </div>
 
       <div class="mode-grid">
-        <button class="mode-card" data-mode="test">
-          <span class="mode-icon test">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-          </span>
-          <span class="mode-info">
-            <h3>随机测试模式</h3>
-            <p>随机抽题、计分，答完给出成绩报告与逐题回顾。</p>
-          </span>
-          <span class="mode-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-        </button>
-
         <button class="mode-card" data-mode="practice">
           <span class="mode-icon practice">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
           </span>
           <span class="mode-info">
             <h3>练习模式</h3>
-            <p>按顺序逐张练习，可随时查看答案，即时反馈，不计分不限时。</p>
+            <p>逐张练习、即时反馈，可查看答案、开启红/绿滤色遮罩辅助辨认，不限时。</p>
+          </span>
+          <span class="mode-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </button>
+
+        <button class="mode-card" data-mode="exam">
+          <span class="mode-icon exam">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6M19 3l3 3"/></svg>
+          </span>
+          <span class="mode-info">
+            <h3>考试模式</h3>
+            <p>随机抽题、每题限时，计分并给出成绩报告与逐题回顾。</p>
           </span>
           <span class="mode-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
         </button>
@@ -375,18 +444,48 @@
             <button data-ver="v6">第 6 版</button>
           </div>
         </div>
-        <div id="countRow">
+
+        <!-- 练习模式：随机题库开关 -->
+        <div id="practiceOpts">
+          <div class="switch-row">
+            <div class="config-label" style="margin:0;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="m15 15 6 6"/><path d="M4 4l5 5"/></svg>
+              随机题库
+            </div>
+            <button class="switch" id="swRandom" role="switch" aria-checked="false" aria-label="随机题库">
+              <span class="switch-knob"></span>
+            </button>
+          </div>
+          <p class="config-hint">开启后打乱题目顺序随机练习；关闭则按版本页码顺序浏览。</p>
+        </div>
+
+        <!-- 考试模式：题数 + 每题限时 -->
+        <div id="examOpts" hidden>
           <div class="config-label">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
-            测试题数
+            题目数量
           </div>
           <div class="seg" id="segCount" role="group" aria-label="选择题目数量">
             <button data-count="10" class="active">10 题</button>
             <button data-count="20">20 题</button>
             <button data-count="0">全部</button>
           </div>
+          <div class="config-label" style="margin-top:14px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            每题限时
+          </div>
+          <div class="seg" id="segTime" role="group" aria-label="选择每题限时">
+            <button data-time="5">5 秒</button>
+            <button data-time="10" class="active">10 秒</button>
+            <button data-time="20">20 秒</button>
+          </div>
         </div>
       </div>
+
+      <button class="btn btn-primary" id="btnStart">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+        开始
+      </button>
 
       <div class="disclaimer">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
@@ -410,6 +509,18 @@
         </div>
       </div>
 
+      <!-- 考试模式：每题倒计时条 -->
+      <div class="timer-wrap" id="timerWrap" style="display:none;">
+        <div class="timer-meta">
+          <span class="timer-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            本题剩余
+          </span>
+          <span class="timer-val" id="timerVal">10s</span>
+        </div>
+        <div class="timer-bar"><span id="timerFill" style="width:100%"></span></div>
+      </div>
+
       <div class="card plate-card">
         <div class="plate-meta">
           <span class="plate-tag" id="plateTag">—</span>
@@ -417,7 +528,31 @@
         </div>
         <div class="plate-stage">
           <img id="plateImg" alt="色觉检测色卡，请辨认其中的图案" />
+          <div class="mask-overlay" id="maskOverlay"></div>
           <div class="spinner" id="spinner"></div>
+        </div>
+
+        <!-- 练习模式：红绿滤色遮罩 + 调节 -->
+        <div class="mask-panel" id="maskPanel" style="display:none;">
+          <div class="mask-buttons">
+            <button class="mask-btn green" id="btnMaskGreen" type="button" aria-pressed="false"><span class="swatch"></span>绿色遮罩</button>
+            <button class="mask-btn red" id="btnMaskRed" type="button" aria-pressed="false"><span class="swatch"></span>红色遮罩</button>
+          </div>
+          <div class="mask-tuner" id="maskTuner" style="display:none;">
+            <div class="slider-row">
+              <div class="slider-head"><span>色温</span><span class="val" id="tempVal">0</span></div>
+              <input type="range" id="sliderTemp" min="-100" max="100" value="0" aria-label="遮罩色温">
+            </div>
+            <div class="slider-row">
+              <div class="slider-head"><span>色调</span><span class="val" id="tintVal">0</span></div>
+              <input type="range" id="sliderTint" min="-100" max="100" value="0" aria-label="遮罩色调">
+            </div>
+            <div class="slider-row">
+              <div class="slider-head"><span>强度</span><span class="val" id="opacityVal">55%</span></div>
+              <input type="range" id="sliderOpacity" min="10" max="90" value="55" aria-label="遮罩强度">
+            </div>
+            <button class="tuner-reset" id="btnMaskReset" type="button">重置遮罩</button>
+          </div>
         </div>
       </div>
 
@@ -439,7 +574,7 @@
     <!-- ============ RESULT ============ -->
     <section class="screen" id="screenResult" aria-labelledby="resultHeading">
       <div class="card result-hero">
-        <div class="result-ring">
+        <div class="result-ring" id="resultRing">
           <svg viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="52"/><circle class="fill" id="ringFill" cx="60" cy="60" r="52"/></svg>
           <div class="pct"><b id="resultPct">0%</b><span>正确率</span></div>
         </div>
@@ -447,7 +582,7 @@
         <p class="result-sub" id="resultSub">—</p>
       </div>
 
-      <div class="card result-stats">
+      <div class="card result-stats" id="resultStats">
         <div class="stat"><b id="statTotal">0</b><span>总题数</span></div>
         <div class="stat ok"><b id="statCorrect">0</b><span>答对</span></div>
         <div class="stat no"><b id="statWrong">0</b><span>答错</span></div>
@@ -508,7 +643,11 @@
     screens: { home: document.getElementById('screenHome'), quiz: document.getElementById('screenQuiz'), result: document.getElementById('screenResult') },
     segVer: document.getElementById('segVer'),
     segCount: document.getElementById('segCount'),
-    countRow: document.getElementById('countRow'),
+    segTime: document.getElementById('segTime'),
+    practiceOpts: document.getElementById('practiceOpts'),
+    examOpts: document.getElementById('examOpts'),
+    swRandom: document.getElementById('swRandom'),
+    btnStart: document.getElementById('btnStart'),
     qCur: document.getElementById('qCur'),
     qTot: document.getElementById('qTot'),
     qScore: document.getElementById('qScore'),
@@ -526,6 +665,8 @@
     btnNext: document.getElementById('btnNext'),
     btnQuit: document.getElementById('btnQuit'),
     ringFill: document.getElementById('ringFill'),
+    resultRing: document.getElementById('resultRing'),
+    resultStats: document.getElementById('resultStats'),
     resultPct: document.getElementById('resultPct'),
     resultTitle: document.getElementById('resultHeading'),
     resultSub: document.getElementById('resultSub'),
@@ -534,16 +675,34 @@
     statWrong: document.getElementById('statWrong'),
     reviewList: document.getElementById('reviewList'),
     btnHome: document.getElementById('btnHome'),
-    btnRetry: document.getElementById('btnRetry')
+    btnRetry: document.getElementById('btnRetry'),
+    // 考试倒计时
+    timerWrap: document.getElementById('timerWrap'),
+    timerVal: document.getElementById('timerVal'),
+    timerFill: document.getElementById('timerFill'),
+    // 遮罩
+    maskOverlay: document.getElementById('maskOverlay'),
+    maskPanel: document.getElementById('maskPanel'),
+    btnMaskGreen: document.getElementById('btnMaskGreen'),
+    btnMaskRed: document.getElementById('btnMaskRed'),
+    maskTuner: document.getElementById('maskTuner'),
+    sliderTemp: document.getElementById('sliderTemp'),
+    sliderTint: document.getElementById('sliderTint'),
+    sliderOpacity: document.getElementById('sliderOpacity'),
+    tempVal: document.getElementById('tempVal'),
+    tintVal: document.getElementById('tintVal'),
+    opacityVal: document.getElementById('opacityVal'),
+    btnMaskReset: document.getElementById('btnMaskReset')
   };
 
   // ---------------- 配置状态 ----------------
-  var cfg = { ver: 'all', count: 10 };
-  var mode = 'test';      // test | practice
+  var cfg = { ver: 'all', count: 10, time: 10, random: false };
+  var mode = 'practice';  // practice | exam
   var quiz = [];          // 当前题序 (每项含 plate + options + 用户作答)
   var qi = 0;             // 当前题索引
   var score = 0;
   var answered = false;
+  var timerId = null;     // 考试倒计时 interval
 
   // ---------------- 工具 ----------------
   function shuffle(arr) {
@@ -604,23 +763,49 @@
   }
   wireSeg(el.segVer, 'ver', function (v) { return v; });
   wireSeg(el.segCount, 'count', function (v) { return parseInt(v, 10); });
+  wireSeg(el.segTime, 'time', function (v) { return parseInt(v, 10); });
 
-  Array.prototype.forEach.call(document.querySelectorAll('.mode-card'), function (card) {
-    card.addEventListener('click', function () { startQuiz(card.getAttribute('data-mode')); });
+  // 随机题库开关（练习模式）
+  el.swRandom.addEventListener('click', function () {
+    cfg.random = !cfg.random;
+    el.swRandom.classList.toggle('on', cfg.random);
+    el.swRandom.setAttribute('aria-checked', cfg.random ? 'true' : 'false');
   });
+
+  // 选中的模式卡：切换首页配置区（练习选项 vs 考试选项）
+  var selectedMode = 'practice';
+  function selectMode(m) {
+    selectedMode = m;
+    Array.prototype.forEach.call(document.querySelectorAll('.mode-card'), function (c) {
+      c.classList.toggle('selected', c.getAttribute('data-mode') === m);
+    });
+    el.practiceOpts.hidden = m !== 'practice';
+    el.examOpts.hidden = m !== 'exam';
+  }
+  // 两段式：点卡=选中并展开对应配置（版本/随机/限时可先调），点底部“开始”按钮才启动
+  Array.prototype.forEach.call(document.querySelectorAll('.mode-card'), function (card) {
+    card.addEventListener('click', function () { selectMode(card.getAttribute('data-mode')); });
+  });
+  selectMode('practice');
+  el.btnStart.addEventListener('click', function () { startQuiz(selectedMode); });
 
   // ---------------- 开始测验 ----------------
   function startQuiz(m) {
     mode = m;
     var pool = BANK.filter(function (p) { return cfg.ver === 'all' ? true : p.ver === cfg.ver; });
     if (mode === 'practice') {
-      // 练习模式：按版本+页码顺序，全部题目
-      quiz = pool.slice().sort(function (a, b) {
-        if (a.ver !== b.ver) return a.ver < b.ver ? -1 : 1;
-        return a.page - b.page;
-      });
+      if (cfg.random) {
+        // 练习 + 随机题库：打乱全部题目
+        quiz = shuffle(pool);
+      } else {
+        // 练习顺序：按版本+页码
+        quiz = pool.slice().sort(function (a, b) {
+          if (a.ver !== b.ver) return a.ver < b.ver ? -1 : 1;
+          return a.page - b.page;
+        });
+      }
     } else {
-      // 测试模式：随机抽取 cfg.count 题（0 = 全部）
+      // 考试模式：随机抽取 cfg.count 题（0 = 全部）
       var shuffled = shuffle(pool);
       quiz = cfg.count > 0 ? shuffled.slice(0, cfg.count) : shuffled;
     }
@@ -631,7 +816,11 @@
     });
     qi = 0; score = 0; answered = false;
     el.qTot.textContent = quiz.length;
-    el.scoreMeta.style.display = mode === 'practice' ? 'none' : '';
+    // 练习模式不计分、显示遮罩面板；考试模式计分、显示倒计时
+    el.scoreMeta.style.display = mode === 'exam' ? '' : 'none';
+    el.maskPanel.style.display = mode === 'practice' ? '' : 'none';
+    el.timerWrap.style.display = mode === 'exam' ? '' : 'none';
+    resetMask();
     show('quiz');
     renderQuestion();
   }
@@ -682,9 +871,60 @@
     el.btnNext.textContent = (qi === quiz.length - 1) ? (mode === 'practice' ? '完成' : '查看成绩') : '下一题';
     el.btnReveal.style.display = mode === 'practice' ? '' : 'none';
 
+    // 练习模式：每题重置遮罩到当前设置（保留用户选的遮罩色与参数）
+    if (mode === 'practice') applyMask();
+
+    // 考试模式：启动本题倒计时
+    if (mode === 'exam') startTimer();
+
     // 翻到新题后把焦点移到第一个选项，保证读屏连续性
     // （首题不抢焦点，避免测验刚进入时突兀）
     if (qi > 0 && el.options.firstChild) el.options.firstChild.focus();
+  }
+
+  // ---------------- 考试倒计时 ----------------
+  function clearTimer() {
+    if (timerId) { clearInterval(timerId); timerId = null; }
+  }
+  function startTimer() {
+    clearTimer();
+    var total = cfg.time;          // 秒
+    var remain = total;
+    el.timerVal.textContent = remain + 's';
+    el.timerFill.style.width = '100%';
+    el.timerWrap.classList.remove('urgent');
+    // 用 100ms 刷新，保证进度条平滑
+    var startTs = Date.now();
+    timerId = setInterval(function () {
+      var elapsed = (Date.now() - startTs) / 1000;
+      remain = Math.max(0, total - elapsed);
+      var pct = remain / total * 100;
+      el.timerFill.style.width = pct.toFixed(1) + '%';
+      el.timerVal.textContent = Math.ceil(remain) + 's';
+      el.timerWrap.classList.toggle('urgent', remain <= 3);
+      if (remain <= 0) {
+        clearTimer();
+        timeUp();
+      }
+    }, 100);
+  }
+  // 时间到：本题记为未作答（错），揭示正确答案
+  function timeUp() {
+    if (answered) return;
+    answered = true;
+    var p = quiz[qi];
+    p._picked = null;   // 超时未作答
+    Array.prototype.forEach.call(el.options.children, function (b) {
+      var txt = b.textContent.trim();
+      b.disabled = true;
+      if (txt === p.answer) b.classList.add('correct'); else b.classList.add('dim');
+    });
+    el.feedback.className = 'feedback show no';
+    el.feedback.innerHTML =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>' +
+      '<span>时间到！正确答案是 <span class="ans">' + escapeHtml(p.answer) + '</span></span>';
+    el.btnNext.style.display = '';
+    el.btnNext.focus();
   }
 
   function escapeHtml(s) {
@@ -697,6 +937,7 @@
   function pick(opt, btn) {
     if (answered) return;
     answered = true;
+    clearTimer();
     var p = quiz[qi];
     p._picked = opt;
     var isCorrect = opt === p.answer;
@@ -736,6 +977,7 @@
   el.btnReveal.addEventListener('click', function () {
     if (answered) return;
     answered = true;
+    clearTimer();
     var p = quiz[qi];
     p._picked = null;   // 跳过
     Array.prototype.forEach.call(el.options.children, function (b) {
@@ -759,35 +1001,97 @@
   });
 
   el.btnQuit.addEventListener('click', function () {
-    if (window.confirm('确定退出本次测验吗？当前进度不会保存。')) show('home');
+    if (window.confirm('确定退出本次测验吗？当前进度不会保存。')) { clearTimer(); show('home'); }
   });
+
+  // ---------------- 红绿滤色遮罩（练习模式） ----------------
+  var activeMask = null;   // null | 'green' | 'red'
+  var tune = { green: { temp: 0, tint: 0, opacity: 55 }, red: { temp: 0, tint: 0, opacity: 55 } };
+  var MASK_BASE = { green: { r: 16, g: 185, b: 129 }, red: { r: 239, g: 68, b: 68 } };
+  function clamp(v, lo, hi) { return v < lo ? lo : (v > hi ? hi : v); }
+  function maskColor(which) {
+    var b = MASK_BASE[which], t = tune[which];
+    var warm = t.temp / 100 * 80, tint = t.tint / 100 * 80;
+    return {
+      r: clamp(Math.round(b.r + warm + tint), 0, 255),
+      g: clamp(Math.round(b.g - tint), 0, 255),
+      b: clamp(Math.round(b.b - warm + tint), 0, 255)
+    };
+  }
+  function applyMask() {
+    if (!activeMask) {
+      el.maskOverlay.classList.remove('on');
+      el.maskOverlay.style.background = '';
+      el.maskOverlay.style.opacity = '';
+      return;
+    }
+    var c = maskColor(activeMask), t = tune[activeMask];
+    el.maskOverlay.style.background = 'rgb(' + c.r + ',' + c.g + ',' + c.b + ')';
+    el.maskOverlay.style.opacity = (t.opacity / 100).toFixed(2);
+    el.maskOverlay.classList.add('on');
+  }
+  function syncTuner() {
+    var which = activeMask || 'green', t = tune[which];
+    el.sliderTemp.value = t.temp; el.sliderTint.value = t.tint; el.sliderOpacity.value = t.opacity;
+    el.tempVal.textContent = t.temp; el.tintVal.textContent = t.tint; el.opacityVal.textContent = t.opacity + '%';
+    el.maskTuner.style.display = activeMask ? '' : 'none';
+  }
+  function setMaskButtons() {
+    el.btnMaskGreen.classList.toggle('active', activeMask === 'green');
+    el.btnMaskRed.classList.toggle('active', activeMask === 'red');
+    el.btnMaskGreen.setAttribute('aria-pressed', activeMask === 'green' ? 'true' : 'false');
+    el.btnMaskRed.setAttribute('aria-pressed', activeMask === 'red' ? 'true' : 'false');
+  }
+  function toggleMask(which) {
+    activeMask = (activeMask === which) ? null : which;
+    setMaskButtons(); applyMask(); syncTuner();
+  }
+  function resetMask() {
+    activeMask = null;
+    tune = { green: { temp: 0, tint: 0, opacity: 55 }, red: { temp: 0, tint: 0, opacity: 55 } };
+    setMaskButtons(); applyMask(); syncTuner();
+  }
+  el.btnMaskGreen.addEventListener('click', function () { toggleMask('green'); });
+  el.btnMaskRed.addEventListener('click', function () { toggleMask('red'); });
+  el.sliderTemp.addEventListener('input', function () { if (!activeMask) return; tune[activeMask].temp = parseInt(this.value, 10); el.tempVal.textContent = tune[activeMask].temp; applyMask(); });
+  el.sliderTint.addEventListener('input', function () { if (!activeMask) return; tune[activeMask].tint = parseInt(this.value, 10); el.tintVal.textContent = tune[activeMask].tint; applyMask(); });
+  el.sliderOpacity.addEventListener('input', function () { if (!activeMask) return; tune[activeMask].opacity = parseInt(this.value, 10); el.opacityVal.textContent = tune[activeMask].opacity + '%'; applyMask(); });
+  el.btnMaskReset.addEventListener('click', function () { if (activeMask) { tune[activeMask] = { temp: 0, tint: 0, opacity: 55 }; applyMask(); syncTuner(); } });
 
   // ---------------- 结果 ----------------
   function finish() {
+    clearTimer();
     var total = quiz.length;
     var correct = quiz.filter(function (p) { return p._picked === p.answer; }).length;
     var wrong = total - correct;
     var pct = total ? Math.round(correct / total * 100) : 0;
+    var isPractice = mode === 'practice';
 
-    el.statTotal.textContent = total;
-    el.statCorrect.textContent = correct;
-    el.statWrong.textContent = wrong;
-    el.resultPct.textContent = pct + '%';
+    // 练习模式不计分：隐藏评分环与答对/答错统计，只保留逐题回顾
+    el.resultRing.style.display = isPractice ? 'none' : '';
+    el.resultStats.style.display = isPractice ? 'none' : '';
 
-    // 环形进度
-    var r = 52, circ = 2 * Math.PI * r;
-    el.ringFill.style.strokeDasharray = circ;
-    el.ringFill.style.strokeDashoffset = circ;
-    var color = pct >= 80 ? 'var(--success)' : (pct >= 50 ? 'var(--accent)' : 'var(--danger)');
-    el.ringFill.style.stroke = color;
-    // 触发动画
-    requestAnimationFrame(function () {
-      requestAnimationFrame(function () { el.ringFill.style.strokeDashoffset = circ * (1 - pct / 100); });
-    });
+    if (!isPractice) {
+      el.statTotal.textContent = total;
+      el.statCorrect.textContent = correct;
+      el.statWrong.textContent = wrong;
+      el.resultPct.textContent = pct + '%';
+
+      // 环形进度
+      var r = 52, circ = 2 * Math.PI * r;
+      el.ringFill.style.strokeDasharray = circ;
+      el.ringFill.style.strokeDashoffset = circ;
+      var color = pct >= 80 ? 'var(--success)' : (pct >= 50 ? 'var(--accent)' : 'var(--danger)');
+      el.ringFill.style.stroke = color;
+      // 触发动画
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () { el.ringFill.style.strokeDashoffset = circ * (1 - pct / 100); });
+      });
+    }
 
     var title, sub;
-    if (mode === 'practice') {
-      title = '练习完成'; sub = '你已浏览全部 ' + total + ' 张检测图。其中辨认正确 ' + correct + ' 张。多加练习有助于熟悉各类图案。';
+    if (isPractice) {
+      title = '练习完成'; sub = '你已浏览全部 ' + total + ' 张检测图。多加练习有助于熟悉各类图案。本练习不计分。';
     } else if (pct >= 90) {
       title = '色觉表现优秀'; sub = '你的辨识非常准确。注意：本测验不能替代专业色觉检查。';
     } else if (pct >= 70) {
