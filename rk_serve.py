@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 """
 色卡识别工具 - RK3588 无头静态服务器
-- 提供本脚本所在目录的静态文件（index.html / data.js / *-areal.png）
+- 提供本脚本所在目录的静态文件（quiz.html / index.html / data.js / *-areal.webp）
+- 根路径 / 映射到测试工具 quiz.html；复核台经 /index.html 访问
 - 监听 0.0.0.0，便于局域网内其它设备访问
 - 不打开浏览器（板子无桌面）
 - 收到 SIGINT/SIGTERM 时优雅关闭并释放端口
@@ -25,6 +26,13 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 class Handler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=ROOT, **kwargs)
+
+    def send_head(self):
+        # 根路径提供测试工具（quiz.html）而非复核台；复核台仍可经 /index.html 访问
+        path = self.path.split("?", 1)[0].split("#", 1)[0]
+        if path == "/":
+            self.path = "/quiz.html"
+        return super().send_head()
 
     def end_headers(self):
         self.send_header("Cache-Control", "no-store")
