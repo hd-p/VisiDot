@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>色觉检测测验 / Color Vision Quiz</title>
+<meta name="theme-color" content="#eff6ff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ================= 设计系统: Quiz Blue · Micro-interactions ================= */
+  :root, [data-theme="light"] {
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --primary-dim: #dbeafe;
+    --secondary: #7c3aed;
+    --accent: #f59e0b;
+    --accent-dim: #fef3c7;
+
+    --success: #16a34a;
+    --success-dim: #dcfce7;
+    --success-fg: #15803d;
+    --danger: #dc2626;
+    --danger-dim: #fee2e2;
+    --danger-fg: #b91c1c;
+
+    --bg: #eff6ff;
+    --surface: #ffffff;
+    --surface-2: #f1f5fd;
+    --surface-3: #e4ecfc;
+    --fg: #0f172a;
+    --fg-muted: #64748b;
+    --border: #e4ecfc;
+    --border-strong: #cbd5e1;
+    --ring: rgba(37,99,235,0.4);
+
+    --radius-lg: 20px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+    --shadow-sm: 0 1px 2px rgba(15,23,42,0.06), 0 2px 8px rgba(15,23,42,0.04);
+    --shadow: 0 2px 4px rgba(15,23,42,0.06), 0 8px 24px rgba(15,23,42,0.08);
+    --shadow-lg: 0 12px 40px rgba(15,23,42,0.14);
+  }
+  [data-theme="dark"] {
+    --primary: #60a5fa;
+    --primary-hover: #93c5fd;
+    --primary-dim: #1e3a5f;
+    --secondary: #a78bfa;
+    --accent: #fbbf24;
+    --accent-dim: #422006;
+
+    --success: #4ade80;
+    --success-dim: #14331f;
+    --success-fg: #86efac;
+    --danger: #f87171;
+    --danger-dim: #3b1414;
+    --danger-fg: #fca5a5;
+
+    --bg: #0b1220;
+    --surface: #121b2e;
+    --surface-2: #1a2540;
+    --surface-3: #22304f;
+    --fg: #e8eefb;
+    --fg-muted: #94a3b8;
+    --border: #22304f;
+    --border-strong: #33405c;
+    --ring: rgba(96,165,250,0.45);
+
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.4);
+    --shadow: 0 2px 4px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.35);
+    --shadow-lg: 0 12px 40px rgba(0,0,0,0.5);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg); color: var(--fg); line-height: 1.6;
+    -webkit-font-smoothing: antialiased; min-height: 100dvh;
+    transition: background .3s ease, color .3s ease;
+  }
+  h1, h2, h3, .font-head { font-family: 'Figtree', 'Noto Sans', sans-serif; letter-spacing: -0.02em; }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
+
+  /* ---------------- App shell ---------------- */
+  .app { max-width: 680px; margin: 0 auto; padding: 0 16px calc(24px + env(safe-area-inset-bottom)); min-height: 100dvh; display: flex; flex-direction: column; }
+
+  header {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: calc(14px + env(safe-area-inset-top)) 2px 14px;
+    position: sticky; top: 0; z-index: 50; background: var(--bg);
+  }
+  header .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  header .logo {
+    width: 36px; height: 36px; border-radius: 11px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    display: grid; place-items: center; color: #fff;
+  }
+  header .logo svg { width: 21px; height: 21px; }
+  header h1 { font-size: 17px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  header .sub { color: var(--fg-muted); font-weight: 500; font-size: 12px; }
+
+  .icon-btn {
+    width: 40px; height: 40px; border-radius: 11px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--fg-muted); cursor: pointer;
+    display: grid; place-items: center; transition: all .2s ease; flex-shrink: 0;
+  }
+  .icon-btn:hover { color: var(--primary); border-color: var(--primary); }
+  .icon-btn:active { transform: scale(0.94); }
+  .icon-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }
+  .icon-btn svg { width: 20px; height: 20px; }
+  .icon-btn .moon { display: none; }
+  [data-theme="dark"] .icon-btn .sun { display: none; }
+  [data-theme="dark"] .icon-btn .moon { display: block; }
+
+  main { flex: 1; display: flex; flex-direction: column; }
+
+  /* ---------------- Screens ---------------- */
+  .screen { display: none; flex-direction: column; gap: 18px; animation: fadeUp .35s ease; }
+  .screen.active { display: flex; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+  }
+
+  /* ---------------- Home ---------------- */
+  .hero { text-align: center; padding: 20px 8px 4px; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 999px;
+    background: var(--primary-dim); color: var(--primary); font-size: 13px; font-weight: 600; margin-bottom: 16px;
+  }
+  .hero-badge svg { width: 15px; height: 15px; }
+  .hero h2 { font-size: clamp(26px, 6vw, 34px); font-weight: 800; line-height: 1.2; margin-bottom: 12px; }
+  .hero p { color: var(--fg-muted); font-size: 15px; max-width: 30em; margin: 0 auto; }
+
+  .mode-grid { display: grid; gap: 14px; }
+  .mode-card {
+    text-align: left; padding: 20px; cursor: pointer; border: 1.5px solid var(--border);
+    background: var(--surface); border-radius: var(--radius-lg); transition: all .2s ease;
+    display: flex; align-items: center; gap: 16px; width: 100%; font-family: inherit; color: inherit;
+  }
+  .mode-card:hover { border-color: var(--primary); box-shadow: var(--shadow); transform: translateY(-2px); }
+  .mode-card:active { transform: translateY(0) scale(0.99); }
+  .mode-card:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }
+  .mode-icon { width: 52px; height: 52px; border-radius: 15px; display: grid; place-items: center; flex-shrink: 0; }
+  .mode-icon svg { width: 26px; height: 26px; }
+  .mode-icon.test { background: var(--primary-dim); color: var(--primary); }
+  .mode-icon.practice { background: var(--accent-dim); color: var(--accent); }
+  .mode-info { min-width: 0; flex: 1; }
+  .mode-info h3 { font-size: 17px; font-weight: 700; margin-bottom: 3px; }
+  .mode-info p { font-size: 13.5px; color: var(--fg-muted); line-height: 1.45; }
+  .mode-arrow { color: var(--fg-muted); flex-shrink: 0; transition: transform .2s ease; }
+  .mode-card:hover .mode-arrow { transform: translateX(3px); color: var(--primary); }
+  .mode-arrow svg { width: 20px; height: 20px; }
+
+  /* config row */
+  .config { padding: 18px 20px; display: flex; flex-direction: column; gap: 16px; }
+  .config-label { font-size: 13px; font-weight: 600; color: var(--fg-muted); display: flex; align-items: center; gap: 7px; }
+  .config-label svg { width: 16px; height: 16px; }
+  .seg { display: flex; gap: 6px; background: var(--surface-2); padding: 5px; border-radius: 12px; }
+  .seg button {
+    flex: 1; border: none; background: transparent; padding: 9px 8px; border-radius: 8px;
+    font-size: 14px; font-weight: 600; color: var(--fg-muted); cursor: pointer;
+    font-family: 'Figtree', sans-serif; transition: all .18s ease; min-height: 44px;
+  }
+  .seg button:hover { color: var(--fg); }
+  .seg button.active { background: var(--surface); color: var(--primary); box-shadow: var(--shadow-sm); }
+  .seg button:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }
+
+  /* ---------------- Buttons ---------------- */
+  .btn {
+    border: none; padding: 15px 24px; border-radius: 14px; cursor: pointer; font-size: 16px; font-weight: 700;
+    font-family: 'Figtree', sans-serif; transition: all .2s ease; display: inline-flex; align-items: center;
+    justify-content: center; gap: 8px; min-height: 52px; width: 100%;
+  }
+  .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }
+  .btn svg { width: 19px; height: 19px; }
+  .btn-primary { background: var(--primary); color: #fff; box-shadow: var(--shadow-sm); }
+  .btn-primary:hover { background: var(--primary-hover); box-shadow: var(--shadow); transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0) scale(0.99); }
+  [data-theme="dark"] .btn-primary { color: #0b1220; }
+  .btn-ghost { background: var(--surface); color: var(--fg); border: 1.5px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
+  .btn-accent { background: var(--accent); color: #422006; box-shadow: var(--shadow-sm); }
+  .btn-accent:hover { filter: brightness(1.05); transform: translateY(-1px); }
+
+  /* ---------------- Quiz screen ---------------- */
+  .quiz-top { display: flex; align-items: center; gap: 12px; }
+  .quiz-top .back { flex-shrink: 0; }
+  .progress-wrap { flex: 1; }
+  .progress-meta { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; font-size: 13px; }
+  .progress-meta .q-count { font-weight: 700; font-family: 'Figtree', sans-serif; color: var(--fg); }
+  .progress-meta .q-count .cur { color: var(--primary); font-size: 16px; }
+  .progress-meta .score { color: var(--fg-muted); font-weight: 600; }
+  .progress-meta .score b { color: var(--success-fg); }
+  .progress-bar { height: 8px; border-radius: 999px; background: var(--surface-3); overflow: hidden; }
+  .progress-bar span { display: block; height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); border-radius: 999px; transition: width .4s cubic-bezier(.4,0,.2,1); }
+
+  .plate-card { padding: 16px; }
+  .plate-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding: 0 4px; }
+  .plate-tag { font-size: 12px; font-weight: 600; color: var(--fg-muted); background: var(--surface-2); padding: 4px 11px; border-radius: 999px; }
+  .plate-type { font-size: 12px; font-weight: 700; padding: 4px 11px; border-radius: 999px; }
+  .type-digit  { background: var(--primary-dim); color: var(--primary); }
+  .type-shape  { background: var(--accent-dim); color: var(--accent); }
+  .type-animal { background: #ede9fe; color: var(--secondary); }
+  [data-theme="dark"] .type-animal { background: #2e2350; color: var(--secondary); }
+  .plate-stage {
+    position: relative; border-radius: var(--radius-md); overflow: hidden; isolation: isolate;
+    background: var(--surface-2); display: flex; align-items: center; justify-content: center;
+    aspect-ratio: 1 / 1; width: 100%;
+  }
+  .plate-stage img { display: block; width: 100%; height: 100%; object-fit: contain; }
+  .plate-stage .spinner {
+    position: absolute; width: 40px; height: 40px; border-radius: 50%;
+    border: 3px solid var(--surface-3); border-top-color: var(--primary); animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .plate-stage img.loaded + .spinner { display: none; }
+
+  .question-title { font-size: 16px; font-weight: 700; text-align: center; padding: 2px 4px; }
+  .question-title .hint { display: block; font-size: 13px; font-weight: 500; color: var(--fg-muted); margin-top: 2px; }
+
+  /* options */
+  .options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 380px) { .options { grid-template-columns: 1fr; } }
+  .option {
+    position: relative; padding: 16px 18px; border: 1.5px solid var(--border); border-radius: var(--radius-md);
+    background: var(--surface); cursor: pointer; font-family: inherit; font-size: 17px; font-weight: 600; color: var(--fg);
+    text-align: center; transition: all .18s ease; min-height: 60px; display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .option:hover:not(:disabled) { border-color: var(--primary); background: var(--primary-dim); transform: translateY(-2px); }
+  .option:active:not(:disabled) { transform: translateY(0) scale(0.98); }
+  .option:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }
+  .option .badge { position: absolute; top: 8px; right: 10px; width: 20px; height: 20px; opacity: 0; transition: opacity .2s ease; }
+  .option.correct { border-color: var(--success); background: var(--success-dim); color: var(--success-fg); }
+  .option.correct .badge.check { opacity: 1; color: var(--success); }
+  .option.wrong { border-color: var(--danger); background: var(--danger-dim); color: var(--danger-fg); }
+  .option.wrong .badge.cross { opacity: 1; color: var(--danger); }
+  .option:disabled { cursor: default; }
+  .option.dim { opacity: 0.5; }
+
+  /* feedback banner */
+  .feedback {
+    display: none; align-items: center; gap: 12px; padding: 14px 18px; border-radius: var(--radius-md);
+    font-size: 15px; font-weight: 600; animation: fadeUp .3s ease;
+  }
+  .feedback.show { display: flex; }
+  .feedback svg { width: 22px; height: 22px; flex-shrink: 0; }
+  .feedback.ok { background: var(--success-dim); color: var(--success-fg); }
+  .feedback.no { background: var(--danger-dim); color: var(--danger-fg); }
+  .feedback .ans { font-weight: 700; }
+
+  .quiz-actions { display: flex; gap: 12px; }
+  .quiz-actions .btn { flex: 1; }
+
+  /* practice-only reveal */
+  .reveal-row { display: flex; align-items: center; justify-content: center; gap: 10px; }
+
+  /* ---------------- Result screen ---------------- */
+  .result-hero { text-align: center; padding: 28px 20px; }
+  .result-ring { width: 160px; height: 160px; margin: 0 auto 18px; position: relative; }
+  .result-ring svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+  .result-ring .track { fill: none; stroke: var(--surface-3); stroke-width: 12; }
+  .result-ring .fill { fill: none; stroke: var(--primary); stroke-width: 12; stroke-linecap: round; transition: stroke-dashoffset 1s cubic-bezier(.4,0,.2,1); }
+  .result-ring .pct { position: absolute; inset: 0; display: grid; place-items: center; flex-direction: column; }
+  .result-ring .pct b { font-family: 'Figtree', sans-serif; font-size: 40px; font-weight: 800; color: var(--fg); line-height: 1; }
+  .result-ring .pct span { font-size: 13px; color: var(--fg-muted); font-weight: 600; }
+  .result-title { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+  .result-sub { color: var(--fg-muted); font-size: 15px; max-width: 32em; margin: 0 auto; }
+  .result-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .stat { text-align: center; padding: 16px 8px; }
+  .stat b { display: block; font-family: 'Figtree', sans-serif; font-size: 26px; font-weight: 800; line-height: 1; }
+  .stat span { font-size: 12.5px; color: var(--fg-muted); font-weight: 600; margin-top: 5px; display: block; }
+  .stat.ok b { color: var(--success-fg); }
+  .stat.no b { color: var(--danger-fg); }
+
+  .disclaimer {
+    display: flex; gap: 10px; padding: 14px 16px; border-radius: var(--radius-md);
+    background: var(--surface-2); color: var(--fg-muted); font-size: 12.5px; line-height: 1.5;
+  }
+  .disclaimer svg { width: 17px; height: 17px; flex-shrink: 0; margin-top: 1px; color: var(--accent); }
+
+  /* review list */
+  .review-list { display: flex; flex-direction: column; gap: 10px; }
+  .review-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; }
+  .review-thumb { width: 52px; height: 52px; border-radius: 10px; overflow: hidden; background: var(--surface-2); flex-shrink: 0; }
+  .review-thumb img { width: 100%; height: 100%; object-fit: contain; }
+  .review-main { flex: 1; min-width: 0; }
+  .review-main .rq { font-size: 13px; color: var(--fg-muted); }
+  .review-main .ra { font-size: 14px; font-weight: 600; margin-top: 2px; }
+  .review-main .ra .yours { color: var(--danger-fg); }
+  .review-main .ra .right { color: var(--success-fg); }
+  .review-status { flex-shrink: 0; }
+  .review-status svg { width: 22px; height: 22px; }
+  .review-status.ok { color: var(--success); }
+  .review-status.no { color: var(--danger); }
+
+  .section-title { font-size: 15px; font-weight: 700; padding: 4px 4px 0; display: flex; align-items: center; gap: 8px; }
+  .section-title svg { width: 18px; height: 18px; color: var(--fg-muted); }
+
+  .footer-note { text-align: center; font-size: 12px; color: var(--fg-muted); padding: 20px 0 8px; }
+  .footer-note a { color: var(--primary); text-decoration: none; }
+  .footer-note a:hover { text-decoration: underline; }
+
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <span class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="9" cy="10" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="10" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="14.5" r="1.3" fill="currentColor" stroke="none"/></svg>
+      </span>
+      <div>
+        <h1>色觉检测测验</h1>
+        <div class="sub">Color Vision Quiz</div>
+      </div>
+    </div>
+    <button class="icon-btn" id="themeToggle" aria-label="切换明暗主题" title="切换明暗主题">
+      <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+  </header>
+
+  <main>
+    <!-- ============ HOME ============ -->
+    <section class="screen active" id="screenHome" aria-labelledby="homeHeading">
+      <div class="hero">
+        <span class="hero-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+          112 张色觉检测图
+        </span>
+        <h2 id="homeHeading">测测你的色觉</h2>
+        <p>选择一种模式开始。看图后从 4 个选项中选出你识别到的数字或图形。</p>
+      </div>
+
+      <div class="mode-grid">
+        <button class="mode-card" data-mode="test">
+          <span class="mode-icon test">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </span>
+          <span class="mode-info">
+            <h3>随机测试模式</h3>
+            <p>随机抽题、计分，答完给出成绩报告与逐题回顾。</p>
+          </span>
+          <span class="mode-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </button>
+
+        <button class="mode-card" data-mode="practice">
+          <span class="mode-icon practice">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+          </span>
+          <span class="mode-info">
+            <h3>练习模式</h3>
+            <p>按顺序逐张练习，可随时查看答案，即时反馈，不计分不限时。</p>
+          </span>
+          <span class="mode-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </button>
+      </div>
+
+      <div class="card config">
+        <div>
+          <div class="config-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18"/></svg>
+            图册版本
+          </div>
+          <div class="seg" id="segVer" role="group" aria-label="选择图册版本">
+            <button data-ver="all" class="active">全部</button>
+            <button data-ver="v5">第 5 版</button>
+            <button data-ver="v6">第 6 版</button>
+          </div>
+        </div>
+        <div id="countRow">
+          <div class="config-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+            测试题数
+          </div>
+          <div class="seg" id="segCount" role="group" aria-label="选择题目数量">
+            <button data-count="10" class="active">10 题</button>
+            <button data-count="20">20 题</button>
+            <button data-count="0">全部</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="disclaimer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <span>本工具仅供趣味自测与练习，不能替代专业色觉检查。屏幕显示会改变颜色，如有色觉方面的疑虑请咨询眼科医生。</span>
+      </div>
+    </section>
+
+    <!-- ============ QUIZ ============ -->
+    <section class="screen" id="screenQuiz" aria-labelledby="quizHeading">
+      <h2 id="quizHeading" class="sr-only">答题中</h2>
+      <div class="quiz-top">
+        <button class="icon-btn back" id="btnQuit" aria-label="退出并返回首页" title="退出">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <div class="progress-wrap">
+          <div class="progress-meta">
+            <span class="q-count"><span class="cur" id="qCur">1</span> / <span id="qTot">10</span></span>
+            <span class="score" id="scoreMeta">正确 <b id="qScore">0</b></span>
+          </div>
+          <div class="progress-bar" role="progressbar" aria-label="答题进度"><span id="progFill" style="width:0%"></span></div>
+        </div>
+      </div>
+
+      <div class="card plate-card">
+        <div class="plate-meta">
+          <span class="plate-tag" id="plateTag">—</span>
+          <span class="plate-type" id="plateType">—</span>
+        </div>
+        <div class="plate-stage">
+          <img id="plateImg" alt="色觉检测色卡，请辨认其中的图案" />
+          <div class="spinner" id="spinner"></div>
+        </div>
+      </div>
+
+      <div class="question-title" id="questionTitle">你看到的是？<span class="hint" id="questionHint"></span></div>
+
+      <div class="options" id="options" role="radiogroup" aria-label="选择答案"></div>
+
+      <div class="feedback" id="feedback" role="status" aria-live="polite"></div>
+
+      <div class="quiz-actions" id="quizActions">
+        <button class="btn btn-ghost" id="btnReveal" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+          查看答案
+        </button>
+        <button class="btn btn-primary" id="btnNext" style="display:none;">下一题</button>
+      </div>
+    </section>
+
+    <!-- ============ RESULT ============ -->
+    <section class="screen" id="screenResult" aria-labelledby="resultHeading">
+      <div class="card result-hero">
+        <div class="result-ring">
+          <svg viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="52"/><circle class="fill" id="ringFill" cx="60" cy="60" r="52"/></svg>
+          <div class="pct"><b id="resultPct">0%</b><span>正确率</span></div>
+        </div>
+        <h2 id="resultHeading" class="result-title">—</h2>
+        <p class="result-sub" id="resultSub">—</p>
+      </div>
+
+      <div class="card result-stats">
+        <div class="stat"><b id="statTotal">0</b><span>总题数</span></div>
+        <div class="stat ok"><b id="statCorrect">0</b><span>答对</span></div>
+        <div class="stat no"><b id="statWrong">0</b><span>答错</span></div>
+      </div>
+
+      <div class="quiz-actions">
+        <button class="btn btn-ghost" id="btnHome">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+          返回首页
+        </button>
+        <button class="btn btn-primary" id="btnRetry">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9 9 0 0 0-6.4 2.6L3 8"/><path d="M3 3v5h5"/></svg>
+          再测一次
+        </button>
+      </div>
+
+      <div class="section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        逐题回顾
+      </div>
+      <div class="review-list" id="reviewList"></div>
+
+      <div class="disclaimer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <span>结果仅供参考，不构成医学诊断。真正的色觉检查需在标准光照下由专业人员进行。</span>
+      </div>
+    </section>
+  </main>
+
+  <div class="footer-note">
+    色觉检测测验 · 基于俞自萍色盲检查图 · <a href="index.html">复核台 →</a>
+  </div>
+</div>
+
+<script src="quiz-data.js"></script>
+<script>
+(function () {
+  var BANK = window.QUIZ_BANK || [];
+  var THEME_KEY = 'colorQuizTheme';
+  var root = document.documentElement;
+
+  // ---------------- 主题 ----------------
+  function applyTheme(t) { root.setAttribute('data-theme', t); }
+  (function initTheme() {
+    var t = null;
+    try { t = localStorage.getItem(THEME_KEY); } catch (e) {}
+    if (!t) t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+    applyTheme(t);
+  })();
+  document.getElementById('themeToggle').addEventListener('click', function () {
+    var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+  });
+
+  // ---------------- 元素 ----------------
+  var el = {
+    screens: { home: document.getElementById('screenHome'), quiz: document.getElementById('screenQuiz'), result: document.getElementById('screenResult') },
+    segVer: document.getElementById('segVer'),
+    segCount: document.getElementById('segCount'),
+    countRow: document.getElementById('countRow'),
+    qCur: document.getElementById('qCur'),
+    qTot: document.getElementById('qTot'),
+    qScore: document.getElementById('qScore'),
+    scoreMeta: document.getElementById('scoreMeta'),
+    progFill: document.getElementById('progFill'),
+    plateTag: document.getElementById('plateTag'),
+    plateType: document.getElementById('plateType'),
+    plateImg: document.getElementById('plateImg'),
+    spinner: document.getElementById('spinner'),
+    questionTitle: document.getElementById('questionTitle'),
+    questionHint: document.getElementById('questionHint'),
+    options: document.getElementById('options'),
+    feedback: document.getElementById('feedback'),
+    btnReveal: document.getElementById('btnReveal'),
+    btnNext: document.getElementById('btnNext'),
+    btnQuit: document.getElementById('btnQuit'),
+    ringFill: document.getElementById('ringFill'),
+    resultPct: document.getElementById('resultPct'),
+    resultTitle: document.getElementById('resultHeading'),
+    resultSub: document.getElementById('resultSub'),
+    statTotal: document.getElementById('statTotal'),
+    statCorrect: document.getElementById('statCorrect'),
+    statWrong: document.getElementById('statWrong'),
+    reviewList: document.getElementById('reviewList'),
+    btnHome: document.getElementById('btnHome'),
+    btnRetry: document.getElementById('btnRetry')
+  };
+
+  // ---------------- 配置状态 ----------------
+  var cfg = { ver: 'all', count: 10 };
+  var mode = 'test';      // test | practice
+  var quiz = [];          // 当前题序 (每项含 plate + options + 用户作答)
+  var qi = 0;             // 当前题索引
+  var score = 0;
+  var answered = false;
+
+  // ---------------- 工具 ----------------
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+  var TYPE_META = {
+    digit:  { label: '数字', cls: 'type-digit', hint: '识别图中的数字' },
+    shape:  { label: '图形', cls: 'type-shape', hint: '识别图中的形状' },
+    animal: { label: '图案', cls: 'type-animal', hint: '识别图中的动物或物体' }
+  };
+
+  // 生成 4 个选项：正确答案 + 3 个同类型干扰项
+  function buildOptions(plate) {
+    var correct = plate.answer;
+    // 同类型、同版本优先的候选池
+    var pool = BANK.filter(function (p) {
+      return p.type === plate.type && p.answer !== correct;
+    }).map(function (p) { return p.answer; });
+    // 去重
+    var seen = {}; var uniq = [];
+    pool.forEach(function (a) { if (!seen[a]) { seen[a] = 1; uniq.push(a); } });
+    var distractors = shuffle(uniq).slice(0, 3);
+    // 若同类型不足（极少见），用其它类型补足
+    if (distractors.length < 3) {
+      var extra = BANK.filter(function (p) { return p.answer !== correct && distractors.indexOf(p.answer) === -1; })
+                      .map(function (p) { return p.answer; });
+      var seen2 = {}; distractors.forEach(function (d) { seen2[d] = 1; });
+      shuffle(extra).forEach(function (a) {
+        if (distractors.length >= 3) return;
+        if (!seen2[a]) { seen2[a] = 1; distractors.push(a); }
+      });
+    }
+    return shuffle(distractors.concat([correct]));
+  }
+
+  // ---------------- 屏幕切换 ----------------
+  function show(name) {
+    Object.keys(el.screens).forEach(function (k) {
+      el.screens[k].classList.toggle('active', k === name);
+    });
+    window.scrollTo(0, 0);
+  }
+
+  // ---------------- 首页配置交互 ----------------
+  function wireSeg(container, key, cast) {
+    Array.prototype.forEach.call(container.children, function (b) {
+      b.addEventListener('click', function () {
+        Array.prototype.forEach.call(container.children, function (x) { x.classList.remove('active'); });
+        b.classList.add('active');
+        cfg[key] = cast(b.getAttribute('data-' + key));
+      });
+    });
+  }
+  wireSeg(el.segVer, 'ver', function (v) { return v; });
+  wireSeg(el.segCount, 'count', function (v) { return parseInt(v, 10); });
+
+  Array.prototype.forEach.call(document.querySelectorAll('.mode-card'), function (card) {
+    card.addEventListener('click', function () { startQuiz(card.getAttribute('data-mode')); });
+  });
+
+  // ---------------- 开始测验 ----------------
+  function startQuiz(m) {
+    mode = m;
+    var pool = BANK.filter(function (p) { return cfg.ver === 'all' ? true : p.ver === cfg.ver; });
+    if (mode === 'practice') {
+      // 练习模式：按版本+页码顺序，全部题目
+      quiz = pool.slice().sort(function (a, b) {
+        if (a.ver !== b.ver) return a.ver < b.ver ? -1 : 1;
+        return a.page - b.page;
+      });
+    } else {
+      // 测试模式：随机抽取 cfg.count 题（0 = 全部）
+      var shuffled = shuffle(pool);
+      quiz = cfg.count > 0 ? shuffled.slice(0, cfg.count) : shuffled;
+    }
+    // 为每题预生成选项，并重置作答
+    quiz.forEach(function (p) {
+      p._options = buildOptions(p);
+      p._picked = null;
+    });
+    qi = 0; score = 0; answered = false;
+    el.qTot.textContent = quiz.length;
+    el.scoreMeta.style.display = mode === 'practice' ? 'none' : '';
+    show('quiz');
+    renderQuestion();
+  }
+
+  // ---------------- 渲染题目 ----------------
+  function renderQuestion() {
+    answered = false;
+    var p = quiz[qi];
+    var meta = TYPE_META[p.type] || TYPE_META.digit;
+
+    el.qCur.textContent = qi + 1;
+    el.qScore.textContent = score;
+    el.progFill.style.width = ((qi) / quiz.length * 100).toFixed(1) + '%';
+    el.progFill.parentNode.setAttribute('aria-valuenow', qi);
+    el.progFill.parentNode.setAttribute('aria-valuemax', quiz.length);
+
+    el.plateTag.textContent = p.ver.toUpperCase() + ' · 第 ' + p.page + ' 图';
+    el.plateType.textContent = meta.label;
+    el.plateType.className = 'plate-type ' + meta.cls;
+    el.questionHint.textContent = meta.hint;
+
+    // 图片加载（保留 aspect-ratio 占位，避免 CLS）
+    el.plateImg.classList.remove('loaded');
+    el.spinner.style.display = '';
+    // 先挂 onload/onerror 再设 src，避免缓存秒开时错过 load 事件导致 spinner 不消失
+    el.plateImg.onload = function () { el.plateImg.classList.add('loaded'); el.spinner.style.display = 'none'; };
+    el.plateImg.onerror = function () { el.spinner.style.display = 'none'; };
+    el.plateImg.src = p.file;
+
+    // 选项
+    el.options.innerHTML = '';
+    p._options.forEach(function (opt) {
+      var b = document.createElement('button');
+      b.className = 'option';
+      b.setAttribute('role', 'radio');
+      b.setAttribute('aria-checked', 'false');
+      b.innerHTML = escapeHtml(opt) +
+        '<svg class="badge check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>' +
+        '<svg class="badge cross" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+      b.addEventListener('click', function () { pick(opt, b); });
+      el.options.appendChild(b);
+    });
+
+    // 反馈 & 动作区
+    el.feedback.className = 'feedback';
+    el.feedback.innerHTML = '';
+    el.btnNext.style.display = 'none';
+    el.btnNext.textContent = (qi === quiz.length - 1) ? (mode === 'practice' ? '完成' : '查看成绩') : '下一题';
+    el.btnReveal.style.display = mode === 'practice' ? '' : 'none';
+
+    // 翻到新题后把焦点移到第一个选项，保证读屏连续性
+    // （首题不抢焦点，避免测验刚进入时突兀）
+    if (qi > 0 && el.options.firstChild) el.options.firstChild.focus();
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  // ---------------- 作答 ----------------
+  function pick(opt, btn) {
+    if (answered) return;
+    answered = true;
+    var p = quiz[qi];
+    p._picked = opt;
+    var isCorrect = opt === p.answer;
+    if (isCorrect) score++;
+
+    // 标注所有选项
+    Array.prototype.forEach.call(el.options.children, function (b) {
+      var txt = b.textContent.trim();
+      b.disabled = true;
+      b.setAttribute('aria-checked', b === btn ? 'true' : 'false');
+      if (txt === p.answer) b.classList.add('correct');
+      else if (b === btn) b.classList.add('wrong');
+      else b.classList.add('dim');
+    });
+
+    el.qScore.textContent = score;
+    showFeedback(isCorrect, p.answer);
+    el.btnNext.style.display = '';
+    el.btnReveal.style.display = 'none';
+    el.btnNext.focus();
+  }
+
+  function showFeedback(ok, answer) {
+    el.feedback.className = 'feedback show ' + (ok ? 'ok' : 'no');
+    if (ok) {
+      el.feedback.innerHTML =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>' +
+        '<span>回答正确！</span>';
+    } else {
+      el.feedback.innerHTML =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>' +
+        '<span>正确答案是 <span class="ans">' + escapeHtml(answer) + '</span></span>';
+    }
+  }
+
+  // 练习模式：直接查看答案（记为未答/跳过）
+  el.btnReveal.addEventListener('click', function () {
+    if (answered) return;
+    answered = true;
+    var p = quiz[qi];
+    p._picked = null;   // 跳过
+    Array.prototype.forEach.call(el.options.children, function (b) {
+      var txt = b.textContent.trim();
+      b.disabled = true;
+      if (txt === p.answer) b.classList.add('correct'); else b.classList.add('dim');
+    });
+    el.feedback.className = 'feedback show ok';
+    el.feedback.innerHTML =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>' +
+      '<span>答案是 <span class="ans">' + escapeHtml(p.answer) + '</span></span>';
+    el.btnReveal.style.display = 'none';
+    el.btnNext.style.display = '';
+    el.btnNext.focus();
+  });
+
+  // ---------------- 下一题 / 完成 ----------------
+  el.btnNext.addEventListener('click', function () {
+    if (qi < quiz.length - 1) { qi++; renderQuestion(); }
+    else finish();
+  });
+
+  el.btnQuit.addEventListener('click', function () {
+    if (window.confirm('确定退出本次测验吗？当前进度不会保存。')) show('home');
+  });
+
+  // ---------------- 结果 ----------------
+  function finish() {
+    var total = quiz.length;
+    var correct = quiz.filter(function (p) { return p._picked === p.answer; }).length;
+    var wrong = total - correct;
+    var pct = total ? Math.round(correct / total * 100) : 0;
+
+    el.statTotal.textContent = total;
+    el.statCorrect.textContent = correct;
+    el.statWrong.textContent = wrong;
+    el.resultPct.textContent = pct + '%';
+
+    // 环形进度
+    var r = 52, circ = 2 * Math.PI * r;
+    el.ringFill.style.strokeDasharray = circ;
+    el.ringFill.style.strokeDashoffset = circ;
+    var color = pct >= 80 ? 'var(--success)' : (pct >= 50 ? 'var(--accent)' : 'var(--danger)');
+    el.ringFill.style.stroke = color;
+    // 触发动画
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { el.ringFill.style.strokeDashoffset = circ * (1 - pct / 100); });
+    });
+
+    var title, sub;
+    if (mode === 'practice') {
+      title = '练习完成'; sub = '你已浏览全部 ' + total + ' 张检测图。其中辨认正确 ' + correct + ' 张。多加练习有助于熟悉各类图案。';
+    } else if (pct >= 90) {
+      title = '色觉表现优秀'; sub = '你的辨识非常准确。注意：本测验不能替代专业色觉检查。';
+    } else if (pct >= 70) {
+      title = '色觉表现良好'; sub = '大部分图案辨认正确。个别偏差可能来自屏幕显色或图案难度。';
+    } else if (pct >= 40) {
+      title = '有一些辨认偏差'; sub = '部分图案未能正确辨认。如日常生活中常有辨色困扰，建议咨询眼科医生。';
+    } else {
+      title = '辨认偏差较明显'; sub = '较多图案未能正确辨认。这不代表诊断结果，但建议到专业机构做标准色觉检查。';
+    }
+    el.resultTitle.textContent = title;
+    el.resultSub.textContent = sub;
+
+    // 逐题回顾
+    el.reviewList.innerHTML = '';
+    quiz.forEach(function (p, i) {
+      var ok = p._picked === p.answer;
+      var skipped = p._picked === null;
+      var item = document.createElement('div');
+      item.className = 'card review-item';
+      var yourText = skipped ? '<span class="yours">未作答</span>' : ('<span class="' + (ok ? 'right' : 'yours') + '">' + escapeHtml(p._picked) + '</span>');
+      var ansLine = ok
+        ? '正确答案 <span class="right">' + escapeHtml(p.answer) + '</span>'
+        : '你选 ' + yourText + ' · 正确 <span class="right">' + escapeHtml(p.answer) + '</span>';
+      item.innerHTML =
+        '<div class="review-thumb"><img loading="lazy" src="' + p.file + '" alt="第' + p.page + '图"></div>' +
+        '<div class="review-main">' +
+          '<div class="rq">第 ' + (i + 1) + ' 题 · ' + p.ver.toUpperCase() + ' 第 ' + p.page + ' 图</div>' +
+          '<div class="ra">' + ansLine + '</div>' +
+        '</div>' +
+        '<div class="review-status ' + (ok ? 'ok' : 'no') + '" aria-label="' + (ok ? '答对' : '答错') + '">' +
+          (ok
+            ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
+            : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>') +
+        '</div>';
+      el.reviewList.appendChild(item);
+    });
+
+    el.progFill.style.width = '100%';
+    show('result');
+  }
+
+  el.btnHome.addEventListener('click', function () { show('home'); });
+  el.btnRetry.addEventListener('click', function () { startQuiz(mode); });
+
+  // ---------------- 键盘支持 ----------------
+  document.addEventListener('keydown', function (e) {
+    if (!el.screens.quiz.classList.contains('active')) return;
+    // 数字键 1-4 选选项
+    if (/^[1-4]$/.test(e.key) && !answered) {
+      var b = el.options.children[parseInt(e.key, 10) - 1];
+      if (b) b.click();
+    } else if (e.key === 'Enter' && answered && el.btnNext.style.display !== 'none') {
+      el.btnNext.click();
+    }
+  });
+
+  // ---------------- 空题库兜底 ----------------
+  if (!BANK.length) {
+    document.querySelector('.mode-grid').innerHTML = '<div class="card config">题库未加载，请确认 quiz-data.js 已正确引入。</div>';
+  }
+})();
+</script>
+</body>
+</html>
