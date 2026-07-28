@@ -4,66 +4,70 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>色觉检测测验 / Color Vision Quiz</title>
-<meta name="theme-color" content="#06070d">
+<meta name="theme-color" content="#ecfeff">
+<link rel="icon" type="image/png" href="app-icon.png">
+<link rel="apple-touch-icon" href="app-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Raleway:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-  /* ================= 设计系统: 深色极光科技 · Aurora Dark ================= */
+  /* ================= 设计系统: 养生浅色 · Organic Wellness ================= */
+  /* 与复核台 index.html 同源的平静青绿 + 健康绿；柔和有机、留白充足、呼吸感 */
   :root {
-    /* 底色：墨黑 → 深海军 → 深紫（非纯黑，避免 OLED 涂抹） */
-    --bg-deep: #06070d;
-    --bg-base: #0a0e1e;
-    --bg-purple: #0d0a1a;
+    /* 底色：极浅青 → 白，构成柔和有机背景 */
+    --bg-deep: #d7f5f4;
+    --bg-base: #ecfeff;
+    --bg-purple: #eef8f4;
 
-    /* 极光多彩：通透、克制 */
-    --electric: #3b82f6;   /* 电光蓝 */
-    --violet: #8b5cf6;     /* 紫罗兰 */
-    --magenta: #d946ef;    /* 洋红 */
-    --teal: #2dd4bf;       /* 青绿 */
-    --amber: #fb923c;      /* 暖橙（点缀） */
+    /* 有机点缀色相（呼吸背景用，通透克制） */
+    --electric: #0891b2;   /* 青（主） */
+    --violet: #22d3ee;     /* 亮青 */
+    --magenta: #14b8a6;    /* 青绿 */
+    --teal: #059669;       /* 健康绿 */
+    --amber: #d97706;      /* 暖橙（点缀） */
 
     /* 语义色 */
-    --primary: #60a5fa;
-    --primary-strong: #3b82f6;
-    --primary-hover: #93c5fd;
-    --primary-dim: rgba(96,165,250,0.16);   /* 主色淡底（玻璃上的着色） */
-    --secondary: #a78bfa;
-    --accent: #fbbf24;
-    --accent-dim: rgba(251,191,36,0.16);
+    --primary: #0891b2;
+    --primary-strong: #0e7490;
+    --primary-hover: #0e7490;
+    --primary-dim: rgba(8,145,178,0.10);    /* 主色淡底 */
+    --secondary: #14b8a6;
+    --accent: #059669;
+    --accent-dim: rgba(5,150,105,0.12);
 
-    --success: #34d399;
-    --success-fg: #6ee7b7;
-    --success-dim: rgba(52,211,153,0.16);
-    --danger: #fb7185;
-    --danger-fg: #fda4af;
-    --danger-dim: rgba(251,113,133,0.16);
+    --success: #059669;
+    --success-fg: #047857;
+    --success-dim: rgba(5,150,105,0.12);
+    --danger: #dc2626;
+    --danger-fg: #b91c1c;
+    --danger-dim: rgba(220,38,38,0.10);
 
-    /* 玻璃材质表面 */
-    --surface: rgba(255,255,255,0.045);
-    --surface-2: rgba(255,255,255,0.07);
-    --surface-3: rgba(255,255,255,0.11);
-    --surface-solid: #12151f;      /* 需要不透明时（如缩略图底） */
-    --glass-hi: rgba(255,255,255,0.10);   /* 卡片顶部高光 */
+    /* 表面：不透明浅色卡片（养生不用暗玻璃，改柔和实底 + 发丝边） */
+    --surface: #ffffff;
+    --surface-2: #e8f1f6;
+    --surface-3: #dcebf0;
+    --surface-solid: #ffffff;      /* 需要不透明时（如缩略图底） */
+    --glass-hi: rgba(255,255,255,0.6);   /* 卡片顶部柔光 */
 
-    /* 文字：满足 WCAG AA */
-    --fg: #eef1fa;          /* 主文字，对深底 >12:1 */
-    --fg-soft: #c3cad9;     /* 次要文字 */
-    --fg-muted: #9099ad;    /* 辅助文字，对深底 ~5:1 */
+    /* 文字：对浅底满足 WCAG AA */
+    --fg: #164e63;          /* 主文字，对浅底 >8:1 */
+    --fg-soft: #35748a;     /* 次要文字 */
+    --fg-muted: #5b7c78;    /* 辅助文字，对浅底 ~4.7:1 */
 
-    --border: rgba(255,255,255,0.09);
-    --border-strong: rgba(255,255,255,0.16);
-    --ring: rgba(96,165,250,0.55);
+    --border: #cbe9e3;
+    --border-strong: #a5d8ce;
+    --ring: rgba(8,145,178,0.45);
 
-    --radius-lg: 20px;
-    --radius-md: 14px;
-    --radius-sm: 10px;
+    /* 有机形态：更大更柔的圆角 */
+    --radius-lg: 24px;
+    --radius-md: 16px;
+    --radius-sm: 11px;
 
-    /* 阴影：环境光 + 辉光，克制使用 */
-    --shadow-sm: 0 1px 2px rgba(0,0,0,0.5);
-    --shadow: 0 8px 30px rgba(0,0,0,0.5);
-    --shadow-lg: 0 20px 60px rgba(0,0,0,0.6);
-    --glow-primary: 0 0 0 1px rgba(96,165,250,0.35), 0 8px 30px rgba(59,130,246,0.35);
+    /* 阴影：柔和环境光，低对比、克制 */
+    --shadow-sm: 0 1px 2px rgba(19,78,74,0.06);
+    --shadow: 0 6px 24px rgba(19,78,74,0.08);
+    --shadow-lg: 0 18px 48px rgba(19,78,74,0.12);
+    --glow-primary: 0 1px 2px rgba(8,145,178,0.2), 0 8px 26px rgba(8,145,178,0.22);
 
     --ease: cubic-bezier(0.16, 1, 0.3, 1);
   }
@@ -71,40 +75,42 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
   body {
-    font-family: 'Noto Sans SC', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    font-family: 'Raleway', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
     color: var(--fg); line-height: 1.6;
     -webkit-font-smoothing: antialiased; min-height: 100dvh;
     background:
-      radial-gradient(120% 80% at 50% -10%, #101736 0%, transparent 55%),
-      linear-gradient(160deg, var(--bg-base) 0%, var(--bg-deep) 45%, var(--bg-purple) 100%);
+      radial-gradient(120% 80% at 50% -10%, #ffffff 0%, transparent 55%),
+      linear-gradient(160deg, var(--bg-base) 0%, var(--bg-deep) 55%, var(--bg-purple) 100%);
     background-attachment: fixed;
   }
-  h1, h2, h3, .font-head { font-family: 'Inter', 'Noto Sans SC', sans-serif; letter-spacing: -0.02em; }
+  h1, h2, h3, .font-head { font-family: 'Raleway', 'Noto Sans SC', sans-serif; font-weight: 700; letter-spacing: -0.01em; }
+  /* 大字标题用 Lora 衬线，增添有机温度 */
+  .hero h2, .result-title { font-family: 'Lora', 'Noto Sans SC', serif; letter-spacing: -0.01em; }
 
-  /* ---------------- 极光背景（缓慢漂移，尊重 reduced-motion） ---------------- */
+  /* ---------------- 呼吸背景（柔和有机团块缓慢漂移，尊重 reduced-motion） ---------------- */
   .aurora { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
   .aurora .blob {
-    position: absolute; border-radius: 50%; filter: blur(70px); opacity: 0.5;
+    position: absolute; border-radius: 50%; filter: blur(80px);
     will-change: transform;
   }
   .aurora .b1 { width: 46vw; height: 46vw; left: -8vw; top: -6vw;
-    background: radial-gradient(circle, var(--electric) 0%, transparent 68%); opacity: 0.32;
+    background: radial-gradient(circle, var(--electric) 0%, transparent 68%); opacity: 0.16;
     animation: drift1 26s ease-in-out infinite; }
   .aurora .b2 { width: 40vw; height: 40vw; right: -10vw; top: 8vh;
-    background: radial-gradient(circle, var(--violet) 0%, transparent 68%); opacity: 0.30;
+    background: radial-gradient(circle, var(--violet) 0%, transparent 68%); opacity: 0.18;
     animation: drift2 32s ease-in-out infinite; }
   .aurora .b3 { width: 38vw; height: 38vw; left: 18vw; bottom: -12vh;
-    background: radial-gradient(circle, var(--magenta) 0%, transparent 70%); opacity: 0.22;
+    background: radial-gradient(circle, var(--magenta) 0%, transparent 70%); opacity: 0.14;
     animation: drift3 34s ease-in-out infinite; }
   .aurora .b4 { width: 30vw; height: 30vw; right: 6vw; bottom: 4vh;
-    background: radial-gradient(circle, var(--teal) 0%, transparent 70%); opacity: 0.20;
+    background: radial-gradient(circle, var(--teal) 0%, transparent 70%); opacity: 0.14;
     animation: drift1 30s ease-in-out infinite reverse; }
   .aurora .b5 { width: 20vw; height: 20vw; left: 40vw; top: 32vh;
-    background: radial-gradient(circle, var(--amber) 0%, transparent 72%); opacity: 0.12;
+    background: radial-gradient(circle, var(--amber) 0%, transparent 72%); opacity: 0.08;
     animation: drift2 38s ease-in-out infinite; }
-  /* 提升可读性：在极光之上盖一层暗化，保证文字对比 */
+  /* 提升可读性：在团块之上盖一层浅色柔化，保证深色文字对比 */
   .aurora::after { content: ''; position: absolute; inset: 0;
-    background: radial-gradient(130% 100% at 50% 40%, transparent 0%, rgba(6,7,13,0.55) 100%); }
+    background: radial-gradient(130% 100% at 50% 40%, transparent 0%, rgba(236,254,255,0.5) 100%); }
   @keyframes drift1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(6vw,4vh) scale(1.08); } }
   @keyframes drift2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-5vw,5vh) scale(1.1); } }
   @keyframes drift3 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(4vw,-4vh) scale(1.06); } }
@@ -113,22 +119,33 @@
     *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
   }
 
-  /* ---------------- App shell ---------------- */
-  .app { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; padding: 0 16px calc(24px + env(safe-area-inset-bottom)); min-height: 100dvh; display: flex; flex-direction: column; }
+  /* ---------------- App shell ----------------
+     宽屏放宽容器利用横向空间；桌面加大左右 gutter 避免贴边。
+     单栏内容（正文/选项）的可读宽度由各屏自身容器再收窄，不随 .app 无限拉宽。 */
+  .app { position: relative; z-index: 1; max-width: 1160px; margin: 0 auto; padding: 0 16px calc(24px + env(safe-area-inset-bottom)); min-height: 100dvh; display: flex; flex-direction: column; }
+  @media (min-width: 1024px) { .app { padding-left: clamp(24px, 4vw, 56px); padding-right: clamp(24px, 4vw, 56px); } }
 
   header {
-    display: flex; align-items: center; justify-content: space-between; gap: 12px;
-    padding: calc(14px + env(safe-area-inset-top)) 4px 14px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    /* 抵消 .app 的左右内边距(基础 16px)，让品牌贴近左边缘、控件贴近右边缘，
+       自身只留 14px 克制的贴边距离 */
+    margin: 0 -16px;
+    padding: calc(14px + env(safe-area-inset-top)) 14px 14px;
     position: sticky; top: 0; z-index: 50;
-    background: linear-gradient(180deg, rgba(6,7,13,0.85) 0%, rgba(6,7,13,0.4) 70%, transparent 100%);
+    background: linear-gradient(180deg, rgba(236,254,255,0.9) 0%, rgba(236,254,255,0.55) 70%, transparent 100%);
     -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
   }
-  header .brand { display: flex; align-items: center; gap: 11px; min-width: 0; }
+  /* 宽屏时 .app 内边距增大，header 负边距同步放大以持续贴边 */
+  @media (min-width: 1024px) {
+    header { margin: 0 calc(-1 * clamp(24px, 4vw, 56px)); padding-left: 18px; padding-right: 18px; }
+  }
+  /* 品牌靠最左、控件靠最右：两端对齐，中间留白自适应 */
+  header .brand { display: flex; align-items: center; gap: 11px; min-width: 0; margin-right: auto; }
   header .logo {
     width: 38px; height: 38px; border-radius: 12px; flex-shrink: 0;
     background: linear-gradient(135deg, var(--electric), var(--violet) 55%, var(--magenta));
     display: grid; place-items: center; color: #fff;
-    box-shadow: 0 4px 18px rgba(139,92,246,0.45);
+    box-shadow: 0 4px 16px rgba(8,145,178,0.32);
   }
   header .logo svg { width: 22px; height: 22px; }
   header h1 { font-size: 17px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -146,20 +163,59 @@
   .icon-btn svg { width: 20px; height: 20px; }
 
   main { flex: 1; display: flex; flex-direction: column; }
+  /* 首页内容垂直居中在可视区内，避免顶部堆叠、整体偏上 */
+  #screenHome.active { justify-content: center; min-height: calc(100dvh - 132px); }
 
   /* ---------------- Screens ---------------- */
   .screen { display: none; flex-direction: column; gap: 18px; }
   .screen.active { display: flex; animation: fadeUp .5s var(--ease); }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-  /* 滚动/进入揭示：卡片依次淡入上移 */
-  .screen.active > * { animation: reveal .55s var(--ease) both; }
-  .screen.active > *:nth-child(1) { animation-delay: .02s; }
-  .screen.active > *:nth-child(2) { animation-delay: .08s; }
-  .screen.active > *:nth-child(3) { animation-delay: .14s; }
-  .screen.active > *:nth-child(4) { animation-delay: .20s; }
-  .screen.active > *:nth-child(5) { animation-delay: .26s; }
-  .screen.active > *:nth-child(6) { animation-delay: .32s; }
+  /* 滚动/进入揭示：卡片依次淡入上移。
+     结构改为栅格后，揭示目标下探到各列的直接子元素（列容器自身不动）。 */
+  .screen.active .home-col > *,
+  .screen.active .quiz-left > *, .screen.active .quiz-right > *,
+  .screen.active .result-left > *, .screen.active .result-right > * { animation: reveal .55s var(--ease) both; }
+  .screen.active .home-col > *:nth-child(1),
+  .screen.active .quiz-left > *:nth-child(1), .screen.active .quiz-right > *:nth-child(1),
+  .screen.active .result-left > *:nth-child(1), .screen.active .result-right > *:nth-child(1) { animation-delay: .02s; }
+  .screen.active .home-col > *:nth-child(2),
+  .screen.active .quiz-left > *:nth-child(2), .screen.active .quiz-right > *:nth-child(2),
+  .screen.active .result-left > *:nth-child(2), .screen.active .result-right > *:nth-child(2) { animation-delay: .08s; }
+  .screen.active .home-col > *:nth-child(3),
+  .screen.active .quiz-left > *:nth-child(3), .screen.active .quiz-right > *:nth-child(3),
+  .screen.active .result-left > *:nth-child(3), .screen.active .result-right > *:nth-child(3) { animation-delay: .14s; }
+  .screen.active .home-col > *:nth-child(4),
+  .screen.active .quiz-right > *:nth-child(4) { animation-delay: .20s; }
+  .screen.active .home-col > *:nth-child(5),
+  .screen.active .quiz-right > *:nth-child(5) { animation-delay: .26s; }
   @keyframes reveal { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+
+  /* ---------------- 宽屏两栏布局（≥900px 横向利用，≤900 单列堆叠） ----------------
+     三屏各自的栅格容器：窄屏 flex 竖排（沿用原堆叠顺序与间距），宽屏切两栏。
+     内容可读宽度：单栏文案/选项在超宽时由内层 max-width 收窄，避免一行过长。 */
+  .home-grid, .quiz-grid, .result-grid { display: flex; flex-direction: column; gap: 18px; }
+  .home-col, .quiz-left, .quiz-right, .result-left, .result-right { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+  /* 首页更松弛的节奏：列内元素间距加大，呼吸感更足（放在共用规则之后以生效） */
+  .home-grid { gap: 22px; }
+  .home-col { gap: 22px; }
+
+  @media (min-width: 900px) {
+    /* 首页：左=文案+开始，右=模式卡+配置 */
+    .home-grid { display: grid; grid-template-columns: minmax(0,1fr) minmax(340px,0.95fr); gap: 28px; align-items: start; }
+    .home-col.intro { position: sticky; top: 84px; }
+    /* 宽屏分栏时 hero 文案靠左（窄屏仍居中）；正文测量宽度受控 */
+    .home-col.intro .hero { text-align: left; padding: 20px 0 4px; }
+    .home-col.intro .hero p { margin: 0; max-width: 34ch; }
+
+    /* 答题：左=色卡舞台(+遮罩)，右=进度/题目/选项/反馈/操作；两栏顶部对齐 */
+    .quiz-grid { display: grid; grid-template-columns: minmax(0,1.1fr) minmax(320px,0.9fr); gap: 24px; align-items: start; }
+    /* 左栏色卡舞台在宽屏可粘顶，右栏答题时左图常驻可见 */
+    .quiz-left { position: sticky; top: 84px; }
+
+    /* 结果：左=评分环/统计/操作，右=逐题回顾 */
+    .result-grid { display: grid; grid-template-columns: minmax(320px,0.85fr) minmax(0,1.15fr); gap: 24px; align-items: start; }
+    .result-left { position: sticky; top: 84px; }
+  }
 
   /* 玻璃卡：半透明材质 + 发丝边框 + 顶部高光 */
   .card {
@@ -174,47 +230,60 @@
   }
 
   /* ---------------- Home ---------------- */
-  .hero { text-align: center; padding: 20px 8px 4px; }
+  .hero { text-align: center; padding: 4px 8px; }
   .hero-badge {
-    display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 999px;
-    background: var(--primary-dim); color: var(--primary); font-size: 13px; font-weight: 600; margin-bottom: 16px;
+    display: inline-flex; align-items: center; gap: 6px; padding: 7px 15px; border-radius: 999px;
+    background: var(--primary-dim); color: var(--primary); font-size: 13px; font-weight: 600; margin-bottom: 18px;
   }
   .hero-badge svg { width: 15px; height: 15px; }
-  .hero h2 { font-size: clamp(26px, 6vw, 34px); font-weight: 800; line-height: 1.2; margin-bottom: 12px; }
-  .hero p { color: var(--fg-muted); font-size: 15px; max-width: 30em; margin: 0 auto; }
+  .hero h2 { font-size: clamp(28px, 6vw, 36px); font-weight: 800; line-height: 1.18; margin-bottom: 14px; }
+  .hero p { color: var(--fg-muted); font-size: 15px; line-height: 1.6; max-width: 30em; margin: 0 auto; }
 
-  .mode-grid { display: grid; gap: 14px; }
+  .mode-grid { display: grid; gap: 16px; }
   .mode-card {
-    text-align: left; padding: 20px; cursor: pointer; border: 1.5px solid var(--border);
-    background: var(--surface); border-radius: var(--radius-lg); transition: all .2s ease;
+    position: relative; text-align: left; padding: 18px 20px; cursor: pointer; border: 1.5px solid var(--border);
+    background: var(--surface); border-radius: var(--radius-lg); transition: all .2s var(--ease);
     display: flex; align-items: center; gap: 16px; width: 100%; font-family: inherit; color: inherit;
+    box-shadow: var(--shadow-sm); overflow: hidden;
   }
-  .mode-card:hover { border-color: var(--primary); box-shadow: var(--shadow); transform: translateY(-2px); }
-  .mode-card:active { transform: translateY(0) scale(0.99); }
+  /* 选中项左侧有机主色条 */
+  .mode-card::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+    background: var(--primary); transform: scaleY(0); transform-origin: center; transition: transform .25s var(--ease);
+  }
+  .mode-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow); transform: translateY(-2px); }
+  .mode-card:active { transform: translateY(0) scale(0.97); }
   .mode-card:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }
-  .mode-card.selected { border-color: var(--primary); background: var(--primary-dim); }
-  .mode-card.selected .mode-arrow { color: var(--primary); }
+  .mode-card.selected { border-color: var(--primary); background: var(--primary-dim); box-shadow: var(--shadow); }
+  .mode-card.selected::before { transform: scaleY(1); }
+  .mode-card.selected .mode-arrow { opacity: 0; }
+  .mode-card.selected .mode-check { opacity: 1; transform: scale(1); }
   .config-hint { font-size: 12.5px; color: var(--fg-muted); margin-top: 8px; line-height: 1.5; }
-  .mode-icon { width: 52px; height: 52px; border-radius: 15px; display: grid; place-items: center; flex-shrink: 0; }
+  .mode-icon { width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; flex-shrink: 0; }
   .mode-icon svg { width: 26px; height: 26px; }
   .mode-icon.test { background: var(--primary-dim); color: var(--primary); }
   .mode-icon.practice { background: var(--accent-dim); color: var(--accent); }
   .mode-info { min-width: 0; flex: 1; }
   .mode-info h3 { font-size: 17px; font-weight: 700; margin-bottom: 3px; }
   .mode-info p { font-size: 13.5px; color: var(--fg-muted); line-height: 1.45; }
-  .mode-arrow { color: var(--fg-muted); flex-shrink: 0; transition: transform .2s ease; }
+  .mode-end { position: relative; width: 24px; height: 24px; flex-shrink: 0; }
+  .mode-arrow, .mode-check { position: absolute; inset: 0; display: grid; place-items: center; transition: all .2s var(--ease); }
+  .mode-arrow { color: var(--fg-muted); }
+  .mode-check { color: var(--primary); opacity: 0; transform: scale(0.6); }
   .mode-card:hover .mode-arrow { transform: translateX(3px); color: var(--primary); }
-  .mode-arrow svg { width: 20px; height: 20px; }
+  .mode-arrow svg, .mode-check svg { width: 22px; height: 22px; }
 
   /* config row */
   .config { padding: 18px 20px; display: flex; flex-direction: column; gap: 16px; }
+  .config-head { font-size: 13px; font-weight: 700; color: var(--fg-soft); display: flex; align-items: center; gap: 8px; }
+  .config-head svg { width: 16px; height: 16px; color: var(--primary); }
   .config-label { font-size: 13px; font-weight: 600; color: var(--fg-muted); display: flex; align-items: center; gap: 7px; }
   .config-label svg { width: 16px; height: 16px; }
   .seg { display: flex; gap: 6px; background: var(--surface-2); padding: 5px; border-radius: 12px; }
   .seg button {
     flex: 1; border: none; background: transparent; padding: 9px 8px; border-radius: 8px;
     font-size: 14px; font-weight: 600; color: var(--fg-muted); cursor: pointer;
-    font-family: 'Figtree', sans-serif; transition: all .18s ease; min-height: 44px;
+    font-family: 'Raleway', sans-serif; transition: all .18s ease; min-height: 44px;
   }
   .seg button:hover { color: var(--fg); }
   .seg button.active { background: var(--surface); color: var(--primary); box-shadow: var(--shadow-sm); }
@@ -223,7 +292,7 @@
   /* ---------------- Buttons ---------------- */
   .btn {
     border: none; padding: 15px 24px; border-radius: 14px; cursor: pointer; font-size: 16px; font-weight: 700;
-    font-family: 'Figtree', sans-serif; transition: all .2s ease; display: inline-flex; align-items: center;
+    font-family: 'Raleway', sans-serif; transition: all .2s ease; display: inline-flex; align-items: center;
     justify-content: center; gap: 8px; min-height: 52px; width: 100%;
   }
   .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }
@@ -245,7 +314,7 @@
   .quiz-top .back { flex-shrink: 0; }
   .progress-wrap { flex: 1; }
   .progress-meta { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; font-size: 13px; }
-  .progress-meta .q-count { font-weight: 700; font-family: 'Figtree', sans-serif; color: var(--fg); }
+  .progress-meta .q-count { font-weight: 700; font-family: 'Raleway', sans-serif; color: var(--fg); }
   .progress-meta .q-count .cur { color: var(--primary); font-size: 16px; }
   .progress-meta .score { color: var(--fg-muted); font-weight: 600; }
   .progress-meta .score b { color: var(--success-fg); }
@@ -258,7 +327,7 @@
   .plate-type { font-size: 12px; font-weight: 700; padding: 4px 11px; border-radius: 999px; }
   .type-digit  { background: var(--primary-dim); color: var(--primary); }
   .type-shape  { background: var(--accent-dim); color: var(--accent); }
-  .type-animal { background: rgba(167,139,250,0.18); color: var(--secondary); }
+  .type-animal { background: rgba(20,184,166,0.16); color: #0f766e; }
   .plate-stage {
     position: relative; border-radius: var(--radius-md); overflow: hidden; isolation: isolate;
     background: var(--surface-2); display: flex; align-items: center; justify-content: center;
@@ -319,13 +388,13 @@
   .result-ring .track { fill: none; stroke: var(--surface-3); stroke-width: 12; }
   .result-ring .fill { fill: none; stroke: var(--primary); stroke-width: 12; stroke-linecap: round; transition: stroke-dashoffset 1s cubic-bezier(.4,0,.2,1); }
   .result-ring .pct { position: absolute; inset: 0; display: grid; place-items: center; flex-direction: column; }
-  .result-ring .pct b { font-family: 'Figtree', sans-serif; font-size: 40px; font-weight: 800; color: var(--fg); line-height: 1; }
+  .result-ring .pct b { font-family: 'Raleway', sans-serif; font-size: 40px; font-weight: 800; color: var(--fg); line-height: 1; }
   .result-ring .pct span { font-size: 13px; color: var(--fg-muted); font-weight: 600; }
   .result-title { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
   .result-sub { color: var(--fg-muted); font-size: 15px; max-width: 32em; margin: 0 auto; }
   .result-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
   .stat { text-align: center; padding: 16px 8px; }
-  .stat b { display: block; font-family: 'Figtree', sans-serif; font-size: 26px; font-weight: 800; line-height: 1; }
+  .stat b { display: block; font-family: 'Raleway', sans-serif; font-size: 26px; font-weight: 800; line-height: 1; }
   .stat span { font-size: 12.5px; color: var(--fg-muted); font-weight: 600; margin-top: 5px; display: block; }
   .stat.ok b { color: var(--success-fg); }
   .stat.no b { color: var(--danger-fg); }
@@ -382,7 +451,7 @@
   .timer-meta { display: flex; align-items: center; justify-content: space-between; font-size: 13px; }
   .timer-label { display: flex; align-items: center; gap: 6px; color: var(--fg-muted); font-weight: 600; }
   .timer-label svg { width: 15px; height: 15px; }
-  .timer-val { font-family: 'Figtree', sans-serif; font-weight: 800; font-size: 16px; color: var(--primary); font-variant-numeric: tabular-nums; }
+  .timer-val { font-family: 'Raleway', sans-serif; font-weight: 800; font-size: 16px; color: var(--primary); font-variant-numeric: tabular-nums; }
   .timer-bar { height: 8px; border-radius: 999px; background: var(--surface-3); overflow: hidden; }
   .timer-bar span { display: block; height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); border-radius: 999px; transition: width 1s linear; }
   .timer-wrap.urgent .timer-val { color: var(--danger-fg); }
@@ -397,18 +466,18 @@
   .mask-buttons { display: flex; gap: 10px; }
   .mask-btn {
     flex: 1; border: 1.5px solid transparent; padding: 11px; border-radius: var(--radius-sm);
-    font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Figtree', sans-serif; transition: all .2s ease;
+    font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Raleway', sans-serif; transition: all .2s ease;
     display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px;
   }
   .mask-btn .swatch { width: 13px; height: 13px; border-radius: 50%; }
-  .mask-btn.green { background: rgba(45,212,191,0.16); color: #5eead4; border-color: rgba(45,212,191,0.28); }
+  .mask-btn.green { background: rgba(5,150,105,0.10); color: #047857; border-color: rgba(5,150,105,0.28); }
   .mask-btn.green .swatch { background: var(--teal); }
-  .mask-btn.green[aria-pressed="true"] { background: var(--teal); color: #04241f; border-color: transparent; }
-  .mask-btn.green[aria-pressed="true"] .swatch { background: #04241f; }
-  .mask-btn.red { background: rgba(251,113,133,0.16); color: #fda4af; border-color: rgba(251,113,133,0.28); }
+  .mask-btn.green[aria-pressed="true"] { background: var(--teal); color: #ffffff; border-color: transparent; }
+  .mask-btn.green[aria-pressed="true"] .swatch { background: #ffffff; }
+  .mask-btn.red { background: rgba(220,38,38,0.09); color: #b91c1c; border-color: rgba(220,38,38,0.26); }
   .mask-btn.red .swatch { background: var(--danger); }
-  .mask-btn.red[aria-pressed="true"] { background: var(--danger); color: #2a0710; border-color: transparent; }
-  .mask-btn.red[aria-pressed="true"] .swatch { background: #2a0710; }
+  .mask-btn.red[aria-pressed="true"] { background: var(--danger); color: #ffffff; border-color: transparent; }
+  .mask-btn.red[aria-pressed="true"] .swatch { background: #ffffff; }
   .mask-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }
   .mask-tuner { display: flex; flex-direction: column; gap: 13px; }
   .slider-row { display: flex; flex-direction: column; gap: 5px; }
@@ -451,6 +520,8 @@
   <main>
     <!-- ============ HOME ============ -->
     <section class="screen active" id="screenHome" aria-labelledby="homeHeading">
+     <div class="home-grid">
+      <div class="home-col intro">
       <div class="hero">
         <span class="hero-badge">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -460,6 +531,18 @@
         <p>选择一种模式开始。看图后从 4 个选项中选出你识别到的数字或图形。</p>
       </div>
 
+      <button class="btn btn-primary" id="btnStart">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+        开始
+      </button>
+
+      <div class="disclaimer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <span>本工具仅供趣味自测与练习，不能替代专业色觉检查。屏幕显示会改变颜色，如有色觉方面的疑虑请咨询眼科医生。</span>
+      </div>
+      </div>
+
+      <div class="home-col picker">
       <div class="mode-grid">
         <button class="mode-card" data-mode="practice">
           <span class="mode-icon practice">
@@ -469,7 +552,10 @@
             <h3>练习模式</h3>
             <p>逐张练习、即时反馈，可查看答案、开启红/绿滤色遮罩辅助辨认，不限时。</p>
           </span>
-          <span class="mode-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+          <span class="mode-end" aria-hidden="true">
+            <span class="mode-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            <span class="mode-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg></span>
+          </span>
         </button>
 
         <button class="mode-card" data-mode="exam">
@@ -480,7 +566,10 @@
             <h3>考试模式</h3>
             <p>随机抽题、每题限时，计分并给出成绩报告与逐题回顾。</p>
           </span>
-          <span class="mode-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+          <span class="mode-end" aria-hidden="true">
+            <span class="mode-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            <span class="mode-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg></span>
+          </span>
         </button>
       </div>
 
@@ -531,46 +620,17 @@
           </div>
         </div>
       </div>
-
-      <button class="btn btn-primary" id="btnStart">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>
-        开始
-      </button>
-
-      <div class="disclaimer">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-        <span>本工具仅供趣味自测与练习，不能替代专业色觉检查。屏幕显示会改变颜色，如有色觉方面的疑虑请咨询眼科医生。</span>
       </div>
+     </div>
     </section>
 
     <!-- ============ QUIZ ============ -->
     <section class="screen" id="screenQuiz" aria-labelledby="quizHeading">
       <h2 id="quizHeading" class="sr-only">答题中</h2>
-      <div class="quiz-top">
-        <button class="icon-btn back" id="btnQuit" aria-label="退出并返回首页" title="退出">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-        </button>
-        <div class="progress-wrap">
-          <div class="progress-meta">
-            <span class="q-count"><span class="cur" id="qCur">1</span> / <span id="qTot">10</span></span>
-            <span class="score" id="scoreMeta">正确 <b id="qScore">0</b></span>
-          </div>
-          <div class="progress-bar" role="progressbar" aria-label="答题进度"><span id="progFill" style="width:0%"></span></div>
-        </div>
-      </div>
 
-      <!-- 考试模式：每题倒计时条 -->
-      <div class="timer-wrap" id="timerWrap" style="display:none;">
-        <div class="timer-meta">
-          <span class="timer-label">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-            本题剩余
-          </span>
-          <span class="timer-val" id="timerVal">10s</span>
-        </div>
-        <div class="timer-bar"><span id="timerFill" style="width:100%"></span></div>
-      </div>
-
+      <div class="quiz-grid">
+      <!-- 左栏：色卡大图舞台 + 练习遮罩控制 -->
+      <div class="quiz-left">
       <div class="card plate-card">
         <div class="plate-meta">
           <span class="plate-tag" id="plateTag">—</span>
@@ -605,6 +665,34 @@
           </div>
         </div>
       </div>
+      </div>
+
+      <!-- 右栏：进度/计分/倒计时 + 问题 + 选项 + 反馈 + 下一题 -->
+      <div class="quiz-right">
+      <div class="quiz-top">
+        <button class="icon-btn back" id="btnQuit" aria-label="退出并返回首页" title="退出">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <div class="progress-wrap">
+          <div class="progress-meta">
+            <span class="q-count"><span class="cur" id="qCur">1</span> / <span id="qTot">10</span></span>
+            <span class="score" id="scoreMeta">正确 <b id="qScore">0</b></span>
+          </div>
+          <div class="progress-bar" role="progressbar" aria-label="答题进度"><span id="progFill" style="width:0%"></span></div>
+        </div>
+      </div>
+
+      <!-- 考试模式：每题倒计时条 -->
+      <div class="timer-wrap" id="timerWrap" style="display:none;">
+        <div class="timer-meta">
+          <span class="timer-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            本题剩余
+          </span>
+          <span class="timer-val" id="timerVal">10s</span>
+        </div>
+        <div class="timer-bar"><span id="timerFill" style="width:100%"></span></div>
+      </div>
 
       <div class="question-title" id="questionTitle">你看到的是？<span class="hint" id="questionHint"></span></div>
 
@@ -619,10 +707,15 @@
         </button>
         <button class="btn btn-primary" id="btnNext" style="display:none;">下一题</button>
       </div>
+      </div><!-- /quiz-right -->
+      </div><!-- /quiz-grid -->
     </section>
 
     <!-- ============ RESULT ============ -->
     <section class="screen" id="screenResult" aria-labelledby="resultHeading">
+      <div class="result-grid">
+      <!-- 左栏：评分环 + 统计 + 操作按钮 -->
+      <div class="result-left">
       <div class="card result-hero">
         <div class="result-ring" id="resultRing">
           <svg viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="52"/><circle class="fill" id="ringFill" cx="60" cy="60" r="52"/></svg>
@@ -648,12 +741,17 @@
           再测一次
         </button>
       </div>
+      </div>
 
+      <!-- 右栏：逐题回顾 -->
+      <div class="result-right">
       <div class="section-title">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         逐题回顾
       </div>
       <div class="review-list" id="reviewList"></div>
+      </div>
+      </div>
 
       <div class="disclaimer">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>

@@ -40,10 +40,27 @@ def load_env():
 
 
 def referenced_files():
-    """从 data.js 解析出引用的图片相对路径。"""
+    """从 data.js 解析出引用的图片相对路径（复核台用 -areal.png）。"""
     with open(os.path.join(HERE, "data.js"), "r", encoding="utf-8") as f:
         txt = f.read()
     files = re.findall(r'"file":\s*"([^"]+)"', txt)
+    return sorted(set(files))
+
+
+def quiz_referenced_files():
+    """从 quiz-data.js 的 QUIZ_KEY 推导测验用图片路径（{ver}/{ver}-{page}-areal.webp）。
+    quiz-data.js 在 JS 里拼接路径，故这里按同一规则从 KEY 重建，跳过 none/blank。"""
+    with open(os.path.join(HERE, "quiz-data.js"), "r", encoding="utf-8") as f:
+        txt = f.read()
+    files = []
+    for ver in ("v5", "v6"):
+        m = re.search(ver + r":\s*\{(.*?)\}", txt, re.S)
+        if not m:
+            continue
+        for page, ans in re.findall(r'"(\d+)":\s*"([^"]+)"', m.group(1)):
+            if ans.strip().lower() in ("none", "blank"):
+                continue
+            files.append("%s/%s-%s-areal.webp" % (ver, ver, page))
     return sorted(set(files))
 
 
@@ -88,9 +105,11 @@ def main():
 
     ensure_remote_dirs(sftp, REMOTE_DIR)
 
-    core = ["index.html", "data.js", "rk_serve.py"]
+    core = ["index.html", "data.js", "rk_serve.py", "quiz.html", "quiz-data.js", "app-icon.png"]
     imgs = referenced_files()
-    all_files = core + imgs
+    quiz_imgs = quiz_referenced_files()
+    # 去重合并（复核台 png 与测验 webp 不重叠，但仍统一去重以防未来交叉）
+    all_files = core + sorted(set(imgs + quiz_imgs))
 
     sent = skipped = 0
     t0 = time.time()
