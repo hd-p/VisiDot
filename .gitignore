@@ -1,7 +1,10 @@
-# === 敏感信息：绝不提交 ===
+# === 敏感信息 / 远程部署：绝不提交（公开项目不含任何远程部署信息）===
 .env
 *.env
 serve.log
+DEPLOY_RK3588.md
+deploy_rk.py
+rk_serve.py
 
 # === 大二进制资源：不纳入 git（体积大、可再生成） ===
 # 原始/裁剪 PNG 色卡
@@ -22,3 +25,10 @@ _*.py
 _keycheck/
 __pycache__/
 *.pyc
+
+# === 图标生成临时产物 / 备份（保留正式 app-icon.png）===
+app-icon-eye.png
+app-icon-plate.png
+app-icon-prev.png
+stitch_app_icon/
+stitch_app_icon.zip
