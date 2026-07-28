@@ -78,6 +78,8 @@
     font-family: 'Raleway', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
     color: var(--fg); line-height: 1.6;
     -webkit-font-smoothing: antialiased; min-height: 100dvh;
+    /* Raleway 默认用 oldstyle 数字（高低错落），全局强制等高 lining 数字，避免数字渲染怪异 */
+    font-variant-numeric: lining-nums;
     background:
       radial-gradient(120% 80% at 50% -10%, #ffffff 0%, transparent 55%),
       linear-gradient(160deg, var(--bg-base) 0%, var(--bg-deep) 55%, var(--bg-purple) 100%);
@@ -127,29 +129,34 @@
 
   header {
     display: flex; align-items: center; justify-content: space-between; gap: 16px;
-    /* 抵消 .app 的左右内边距(基础 16px)，让品牌贴近左边缘、控件贴近右边缘，
-       自身只留 14px 克制的贴边距离 */
-    margin: 0 -16px;
-    padding: calc(14px + env(safe-area-inset-top)) 14px 14px;
+    /* 左右内边距为 0：品牌/控件直接对齐 .app 内容列边缘，
+       与下方内容形成一条隐形对齐线 */
+    padding: calc(14px + env(safe-area-inset-top)) 0 14px;
     position: sticky; top: 0; z-index: 50;
+  }
+  /* 背景条撑满整个视口宽度，垫在头部内容之下；内容本身仍对齐内容列边缘 */
+  header::before {
+    content: ''; position: absolute; z-index: -1; top: 0; bottom: 0;
+    left: 50%; transform: translateX(-50%); width: 100vw;
     background: linear-gradient(180deg, rgba(236,254,255,0.9) 0%, rgba(236,254,255,0.55) 70%, transparent 100%);
     -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
-  }
-  /* 宽屏时 .app 内边距增大，header 负边距同步放大以持续贴边 */
-  @media (min-width: 1024px) {
-    header { margin: 0 calc(-1 * clamp(24px, 4vw, 56px)); padding-left: 18px; padding-right: 18px; }
   }
   /* 品牌靠最左、控件靠最右：两端对齐，中间留白自适应 */
   header .brand { display: flex; align-items: center; gap: 11px; min-width: 0; margin-right: auto; }
   header .logo {
-    width: 38px; height: 38px; border-radius: 12px; flex-shrink: 0;
-    background: linear-gradient(135deg, var(--electric), var(--violet) 55%, var(--magenta));
+    width: 38px; height: 38px; border-radius: 12px; flex-shrink: 0; overflow: hidden;
     display: grid; place-items: center; color: #fff;
     box-shadow: 0 4px 16px rgba(8,145,178,0.32);
   }
   header .logo svg { width: 22px; height: 22px; }
+  header .logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
   header h1 { font-size: 17px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   header .sub { color: var(--fg-muted); font-weight: 500; font-size: 12px; letter-spacing: 0.02em; }
+  /* 宽屏下把右上角控件向外挪，远离两栏中缝、更贴近内容框外缘；
+     位移量始终小于 .app 的右内边距，不会溢出产生横向滚动。 */
+  @media (min-width: 1024px) {
+    header { margin-right: calc(-1 * clamp(16px, 2.2vw, 32px)); }
+  }
 
   .icon-btn {
     width: 42px; height: 42px; border-radius: 12px; border: 1px solid var(--border);
@@ -341,6 +348,20 @@
   @keyframes spin { to { transform: rotate(360deg); } }
   /* spinner 的显隐由 renderQuestion 的 onload/onerror 内联控制（遮罩层插在 img 与 spinner 之间，
      相邻兄弟选择器已不适用） */
+  /* 图片加载失败时的重载按钮：居中小圆按钮，点击重新拉取当前色卡 */
+  .plate-retry {
+    position: absolute; z-index: 6; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    display: grid; place-items: center;
+    width: 52px; height: 52px; border-radius: 50%; cursor: pointer;
+    background: var(--surface); color: var(--primary); border: 1.5px solid var(--border);
+    box-shadow: var(--shadow); transition: all .2s var(--ease);
+  }
+  .plate-retry[hidden] { display: none !important; }
+  .plate-retry:hover { border-color: var(--primary); background: var(--primary-dim); transform: translate(-50%,-50%) scale(1.06); }
+  .plate-retry:active { transform: scale(0.94); }
+  .plate-retry:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }
+  .plate-retry svg { width: 24px; height: 24px; }
+  .plate-retry.spinning svg { animation: spin .8s linear infinite; }
 
   .question-title { font-size: 16px; font-weight: 700; text-align: center; padding: 2px 4px; }
   .question-title .hint { display: block; font-size: 13px; font-weight: 500; color: var(--fg-muted); margin-top: 2px; }
@@ -350,8 +371,12 @@
   @media (max-width: 380px) { .options { grid-template-columns: 1fr; } }
   .option {
     position: relative; padding: 16px 18px; border: 1.5px solid var(--border); border-radius: var(--radius-md);
-    background: var(--surface); cursor: pointer; font-family: inherit; font-size: 17px; font-weight: 600; color: var(--fg);
+    background: var(--surface); cursor: pointer; font-family: inherit; font-size: 18px; font-weight: 700; color: var(--fg);
     text-align: center; transition: all .18s ease; min-height: 60px; display: flex; align-items: center; justify-content: center; gap: 8px;
+    /* Raleway 默认用旧式数字（高低错落），选项多为数字，强制等高+等宽字形，排列整齐 */
+    font-variant-numeric: lining-nums tabular-nums;
+    font-feature-settings: "lnum" 1, "tnum" 1;
+    letter-spacing: 0.02em;
   }
   .option:hover:not(:disabled) { border-color: var(--primary); background: var(--primary-dim); transform: translateY(-2px); }
   .option:active:not(:disabled) { transform: translateY(0) scale(0.98); }
@@ -451,7 +476,7 @@
   .timer-meta { display: flex; align-items: center; justify-content: space-between; font-size: 13px; }
   .timer-label { display: flex; align-items: center; gap: 6px; color: var(--fg-muted); font-weight: 600; }
   .timer-label svg { width: 15px; height: 15px; }
-  .timer-val { font-family: 'Raleway', sans-serif; font-weight: 800; font-size: 16px; color: var(--primary); font-variant-numeric: tabular-nums; }
+  .timer-val { font-family: 'Raleway', sans-serif; font-weight: 800; font-size: 16px; color: var(--primary); font-variant-numeric: lining-nums tabular-nums; }
   .timer-bar { height: 8px; border-radius: 999px; background: var(--surface-3); overflow: hidden; }
   .timer-bar span { display: block; height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); border-radius: 999px; transition: width 1s linear; }
   .timer-wrap.urgent .timer-val { color: var(--danger-fg); }
@@ -482,7 +507,7 @@
   .mask-tuner { display: flex; flex-direction: column; gap: 13px; }
   .slider-row { display: flex; flex-direction: column; gap: 5px; }
   .slider-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 12.5px; font-weight: 600; color: var(--fg-muted); }
-  .slider-head .val { font-variant-numeric: tabular-nums; color: var(--fg); font-weight: 700; }
+  .slider-head .val { font-variant-numeric: lining-nums tabular-nums; color: var(--fg); font-weight: 700; }
   input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 999px; background: var(--surface-3); outline: none; cursor: pointer; }
   input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; border-radius: 50%; background: var(--primary); border: 3px solid var(--surface); box-shadow: var(--shadow-sm); cursor: pointer; }
   input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: var(--primary); border: 3px solid var(--surface); box-shadow: var(--shadow-sm); cursor: pointer; }
@@ -505,7 +530,7 @@
   <header>
     <div class="brand">
       <span class="logo" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="9" cy="10" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="10" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="14.5" r="1.3" fill="currentColor" stroke="none"/></svg>
+        <img src="app-icon.png" alt="">
       </span>
       <div>
         <h1>色觉检测测验</h1>
@@ -640,6 +665,9 @@
           <img id="plateImg" alt="色觉检测色卡，请辨认其中的图案" />
           <div class="mask-overlay" id="maskOverlay"></div>
           <div class="spinner" id="spinner"></div>
+          <button class="plate-retry" id="btnReloadImg" type="button" aria-label="重新加载图片" title="重新加载" hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9 9 0 0 0-6.4 2.6L3 8"/><path d="M3 3v5h5"/></svg>
+          </button>
         </div>
 
         <!-- 练习模式：红绿滤色遮罩 + 调节 -->
@@ -792,6 +820,7 @@
     plateType: document.getElementById('plateType'),
     plateImg: document.getElementById('plateImg'),
     spinner: document.getElementById('spinner'),
+    btnReloadImg: document.getElementById('btnReloadImg'),
     questionTitle: document.getElementById('questionTitle'),
     questionHint: document.getElementById('questionHint'),
     options: document.getElementById('options'),
@@ -838,6 +867,7 @@
   var score = 0;
   var answered = false;
   var timerId = null;     // 考试倒计时 interval
+  var renderToken = 0;    // 每次渲染自增，防止上一题的图片加载回调误启动计时
 
   // ---------------- 工具 ----------------
   function shuffle(arr) {
@@ -854,28 +884,47 @@
     animal: { label: '图案', cls: 'type-animal', hint: '识别图中的动物或物体' }
   };
 
-  // 生成 4 个选项：正确答案 + 3 个同类型干扰项
+  // 数字答案的“格式签名”：纯数字用位数分档 + 是否多组(含“和”)，
+  // 让干扰项与正确答案格式相近（同为 2 位数、同为多组等），
+  // 避免出现 "98" 旁边混入 "6098" / "899和022" 这类一眼可排除的选项。
+  function answerFormat(ans) {
+    if (/[和]/.test(ans)) return 'multi';        // 多组数字，如 "899和022"
+    if (/^\d+$/.test(ans)) return 'd' + ans.length;  // 纯数字按位数：d1/d2/d3/d4
+    return 'other';                               // 形状/动物等非纯数字
+  }
+
+  // 生成 4 个选项：正确答案 + 3 个干扰项。
+  // 优先级：① 同类型且格式相同 → ② 同类型 → ③ 全库，逐级补足，均去重。
   function buildOptions(plate) {
     var correct = plate.answer;
-    // 同类型、同版本优先的候选池
-    var pool = BANK.filter(function (p) {
-      return p.type === plate.type && p.answer !== correct;
-    }).map(function (p) { return p.answer; });
-    // 去重
-    var seen = {}; var uniq = [];
-    pool.forEach(function (a) { if (!seen[a]) { seen[a] = 1; uniq.push(a); } });
-    var distractors = shuffle(uniq).slice(0, 3);
-    // 若同类型不足（极少见），用其它类型补足
-    if (distractors.length < 3) {
-      var extra = BANK.filter(function (p) { return p.answer !== correct && distractors.indexOf(p.answer) === -1; })
-                      .map(function (p) { return p.answer; });
-      var seen2 = {}; distractors.forEach(function (d) { seen2[d] = 1; });
-      shuffle(extra).forEach(function (a) {
-        if (distractors.length >= 3) return;
-        if (!seen2[a]) { seen2[a] = 1; distractors.push(a); }
+    var fmt = answerFormat(correct);
+
+    function poolWhere(pred) {
+      var seen = {}, out = [];
+      BANK.forEach(function (p) {
+        var a = p.answer;
+        if (a === correct || seen[a]) return;
+        if (!pred(p, a)) return;
+        seen[a] = 1; out.push(a);
       });
+      return out;
     }
-    return shuffle(distractors.concat([correct]));
+
+    var sameFmt = poolWhere(function (p, a) { return p.type === plate.type && answerFormat(a) === fmt; });
+    var sameType = poolWhere(function (p) { return p.type === plate.type; });
+    var anyType = poolWhere(function () { return true; });
+
+    var distractors = [];
+    var picked = {};
+    // 逐级从各候选池取值，直到凑满 3 个（每级内部随机）
+    [sameFmt, sameType, anyType].forEach(function (tier) {
+      shuffle(tier).forEach(function (a) {
+        if (distractors.length >= 3 || picked[a]) return;
+        picked[a] = 1; distractors.push(a);
+      });
+    });
+
+    return shuffle(distractors.slice(0, 3).concat([correct]));
   }
 
   // ---------------- 屏幕切换 ----------------
@@ -959,6 +1008,51 @@
     renderQuestion();
   }
 
+  // ---------------- 色卡图片加载（含失败重试） ----------------
+  // 加载当前题的图片：显示 spinner；成功→显示图并按需启动考试计时；
+  // 失败→隐藏 spinner、显示重试按钮（不启动计时，避免看不到图还倒计时）。
+  // 用 renderToken 防止上一题的迟到回调影响当前题。
+  function loadPlate(p, token) {
+    el.plateImg.classList.remove('loaded');
+    el.btnReloadImg.hidden = true;
+    el.spinner.style.display = '';
+    function ready() {
+      if (token !== renderToken) return;   // 已翻到别的题，忽略
+      el.spinner.style.display = 'none';
+      if (mode === 'exam' && !answered) startTimer();
+    }
+    function fail() {
+      if (token !== renderToken) return;
+      el.spinner.style.display = 'none';
+      el.btnReloadImg.hidden = false;      // 露出重试按钮，等待用户点击
+    }
+    el.plateImg.onload = function () { el.plateImg.classList.add('loaded'); ready(); };
+    el.plateImg.onerror = fail;
+    el.plateImg.src = p.file;
+    // 缓存命中时 src 赋值后可能已 complete 且不再触发 onload，主动补一次
+    if (el.plateImg.complete && el.plateImg.naturalWidth > 0) { el.plateImg.classList.add('loaded'); ready(); }
+  }
+  // 重试按钮：重新加载当前题图片（带 cache-buster 强制重新请求）
+  el.btnReloadImg.addEventListener('click', function () {
+    var p = quiz[qi];
+    if (!p) return;
+    el.plateImg.classList.remove('loaded');
+    el.btnReloadImg.hidden = true;
+    el.spinner.style.display = '';
+    var token = renderToken;   // 沿用当前题的 token
+    el.plateImg.onload = function () {
+      if (token !== renderToken) return;
+      el.plateImg.classList.add('loaded'); el.spinner.style.display = 'none';
+      if (mode === 'exam' && !answered) startTimer();
+    };
+    el.plateImg.onerror = function () {
+      if (token !== renderToken) return;
+      el.spinner.style.display = 'none'; el.btnReloadImg.hidden = false;
+    };
+    // cache-buster：绕过失败缓存，强制重新拉取
+    el.plateImg.src = p.file + '?r=' + Date.now();
+  });
+
   // ---------------- 渲染题目 ----------------
   function renderQuestion() {
     answered = false;
@@ -977,12 +1071,10 @@
     el.questionHint.textContent = meta.hint;
 
     // 图片加载（保留 aspect-ratio 占位，避免 CLS）
-    el.plateImg.classList.remove('loaded');
-    el.spinner.style.display = '';
-    // 先挂 onload/onerror 再设 src，避免缓存秒开时错过 load 事件导致 spinner 不消失
-    el.plateImg.onload = function () { el.plateImg.classList.add('loaded'); el.spinner.style.display = 'none'; };
-    el.plateImg.onerror = function () { el.spinner.style.display = 'none'; };
-    el.plateImg.src = p.file;
+    // 考试模式：倒计时改为「图片真正显示后」才启动，避免慢加载时白白吃掉答题时间。
+    // 用 render token 防止上一题的加载回调在已翻页后误启动计时。
+    var token = ++renderToken;
+    loadPlate(p, token);
 
     // 选项
     el.options.innerHTML = '';
@@ -1008,8 +1100,8 @@
     // 练习模式：每题重置遮罩到当前设置（保留用户选的遮罩色与参数）
     if (mode === 'practice') applyMask();
 
-    // 考试模式：启动本题倒计时
-    if (mode === 'exam') startTimer();
+    // 考试模式的倒计时不在此处启动——改由 onPlateReady()（图片显示后）触发，
+    // 避免慢加载时白白吃掉答题时间。
 
     // 翻到新题后把焦点移到第一个选项，保证读屏连续性
     // （首题不抢焦点，避免测验刚进入时突兀）
@@ -1135,7 +1227,7 @@
   });
 
   el.btnQuit.addEventListener('click', function () {
-    if (window.confirm('确定退出本次测验吗？当前进度不会保存。')) { clearTimer(); show('home'); }
+    if (window.confirm('确定退出本次测验吗？当前进度不会保存。')) { renderToken++; clearTimer(); show('home'); }
   });
 
   // ---------------- 红绿滤色遮罩（练习模式） ----------------
