@@ -130,21 +130,17 @@ def main():
     print("upload done: %d sent, %d skipped, %.1fs"
           % (sent, skipped, time.time() - t0), flush=True)
 
-    # 重启服务：先杀掉旧实例，再 nohup 后台启动
-    # 用换行拼接：后台启动 `... &` 后面不能紧跟 `;`，否则 bash 报语法错误。
-    # setsid 让服务脱离 SSH 会话常驻。
-    script = "\n".join([
-        "pkill -f rk_serve.py || true",
-        "sleep 1",
-        "cd %s && PORT=%d setsid nohup python3 rk_serve.py > serve.log 2>&1 &" % (REMOTE_DIR, PORT),
-        "sleep 2",
-        "cat %s/serve.log" % REMOTE_DIR,
-    ])
-    stdin, stdout, stderr = cli.exec_command("bash -c %s" % _shquote(script))
+    # 重启服务：走已安装的 systemd 系统服务（color-test.service）。
+    # 该服务开机自启、脱离 SSH 会话常驻，不会像 nohup/setsid 那样在通道关闭时被回收。
+    # 用 sudo -S 从 stdin 读取密码执行 restart。
+    restart = "sudo -S -p '' systemctl restart color-test.service && sleep 1 && systemctl is-active color-test.service"
+    stdin, stdout, stderr = cli.exec_command(restart)
+    stdin.write(pw + "\n")
+    stdin.flush()
     out = stdout.read().decode("utf-8", "replace")
     err = stderr.read().decode("utf-8", "replace")
-    print("--- server log ---", flush=True)
-    print(out.strip() or err.strip(), flush=True)
+    print("--- restart ---", flush=True)
+    print((out.strip() + " " + err.strip()).strip(), flush=True)
 
     print("\n访问地址（局域网）: http://%s:%d/index.html" % (host, PORT), flush=True)
 
