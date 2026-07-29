@@ -1,0 +1,10 @@
+# 保证跨平台换行一致
+# Shell 脚本必须 LF，否则 Linux 上 bad interpreter
+*.sh text eol=lf
+
+# 其余文本按 git 默认处理
+*.py text
+*.html text
+*.js text
+*.json text
+*.md text
