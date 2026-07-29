@@ -76,6 +76,10 @@ v5/ v6/           Plate images — provide your own (git-ignored)
 
 VisiDot is a self-testing and practice tool for fun and familiarization. **It is not a medical device and cannot replace a professional color vision examination.** Screen rendering alters colors; consult an eye-care professional for any color vision concerns.
 
+## Links
+
+[linuxdo](https://linux.do/)
+
 ## License
 
 No license is granted for the bundled plate images (they are excluded from this repository). Application code (HTML/CSS/JS/Python) may be used under the terms in `LICENSE`.
