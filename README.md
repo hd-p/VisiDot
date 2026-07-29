@@ -27,7 +27,12 @@ Requires **Python 3** (standard library only).
 python serve.py
 ```
 
-This starts a local static server on `http://127.0.0.1:8770/` and opens your browser. On Windows you can double-click `启动.bat`.
+This starts a local static server on `http://127.0.0.1:8770/` and opens the quiz page in your browser.
+
+Platform launchers:
+
+- **Windows** — double-click `启动.bat`
+- **Ubuntu / Linux** — run `./start.sh` (make it executable once with `chmod +x start.sh`)
 
 Any static file server works too — e.g. `python -m http.server`.
 
@@ -57,6 +62,7 @@ quiz-data.js      Quiz answer key + bank builder
 app-icon.png      App icon / favicon
 serve.py          Local static server (auto-opens browser, graceful shutdown)
 启动.bat          Windows one-click launcher
+start.sh          Ubuntu / Linux launcher
 reference/        Answer-key JSON and page-map notes (not runtime dependencies)
 v5/ v6/           Plate images — provide your own (git-ignored)
 ```
