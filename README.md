@@ -1,5 +1,7 @@
 # VisiDot
 
+*[中文说明 →](README.zh-CN.md)*
+
 An offline, single-file web app for **color vision self-testing** and **color-plate review**, built around Ishihara-style pseudoisochromatic plates. Pure HTML/CSS/JS — no build step, no framework, no backend.
 
 VisiDot has two pages:
