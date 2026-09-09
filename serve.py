@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-色卡识别工具 - 本地静态服务器 / 一键启动
-- 从本脚本所在目录提供静态文件（index.html / data.js / 色卡图片）
-- 启动后自动打开浏览器
+VisiDot - 本地静态服务器 / 一键启动
+- 从本脚本所在目录提供静态文件（quiz.html / index.html / 数据 / 色卡图片）
+- 启动后自动打开浏览器，默认进入色觉测验页 quiz.html
 - 关闭时（Ctrl+C 或关闭窗口）优雅回收资源：停止服务、释放 socket、关闭端口
 """
 
@@ -59,7 +59,7 @@ class Server(socketserver.ThreadingTCPServer):
 
 def main():
     port = find_free_port(HOST, PREFERRED_PORT)
-    url = "http://%s:%d/index.html" % (HOST, port)
+    url = "http://%s:%d/quiz.html" % (HOST, port)
 
     httpd = Server((HOST, port), Handler)
 
@@ -85,7 +85,7 @@ def main():
     atexit.register(httpd.server_close)
 
     print("=" * 48)
-    print("  色卡识别工具已启动")
+    print("  VisiDot 已启动")
     print("  地址: %s" % url)
     print("  关闭: 在此窗口按 Ctrl+C，或直接关闭窗口")
     print("=" * 48)
