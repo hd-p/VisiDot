@@ -2,6 +2,8 @@
 
 *[中文说明 →](README.zh-CN.md)*
 
+**🔗 Live demo: [rbg.yanx.cc.cd](https://rbg.yanx.cc.cd)**
+
 An offline, single-file web app for **color vision self-testing**, built around Ishihara-style pseudoisochromatic plates. Pure HTML/CSS/JS — no build step, no framework, no backend.
 
 Take a quiz in **Practice** mode (untimed, instant feedback, red/green filter-mask aids) or **Exam** mode (randomized, per-question timer, scored report with per-question review). The UI uses a calm "wellness-light" design system (cyan + health-green palette, Raleway/Lora typography) and adapts across desktop and mobile layouts.
