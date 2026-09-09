@@ -93,7 +93,7 @@ window.PLATE_DATA = [
   "page": 48,
   "ver": "v5",
   "file": "v5/v5-48-areal.webp",
-  "info": "none/blank"
+  "info": "star — 五角星"
  },
  {
   "page": 49,
