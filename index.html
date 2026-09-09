@@ -10,9 +10,11 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="format-detection" content="telephone=no">
 <title>色卡复核台 / Color Plate Review Console</title>
+<link rel="icon" type="image/png" href="app-icon.png">
+<link rel="apple-touch-icon" href="app-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Noto+Sans:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700&family=Lora:wght@500;600;700&family=Noto+Sans:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <script>
   /* 早期平台检测：在首帧绘制前给 <html> 打上 data-platform，避免样式闪烁 */
   (function () {
@@ -31,6 +33,9 @@
     d.setAttribute('data-platform', platform);
     // 是否为触屏移动外壳（iOS/Android 走 App 外壳布局）
     d.setAttribute('data-shell', (platform === 'ios' || platform === 'android') ? 'mobile' : 'web');
+    // 初始视图为列表；三种外壳共用 data-mview 控制「列表 / 全屏详情」，
+    // 首帧前写入避免详情/列表同时闪现
+    d.setAttribute('data-mview', 'list');
   })();
 </script>
 <style>
@@ -44,6 +49,13 @@
     --flag: #d97706;
     --flag-dim: #fef3c7;
     --review: #2563eb;
+
+    /* 分类语义色相：数字=青 / 路径=蓝 / 动物=橙 / 星形=品红 / 空白=灰 */
+    --cat-digit: #0891b2;
+    --cat-path: #2563eb;
+    --cat-animal: #d97706;
+    --cat-star: #db2777;
+    --cat-blank: #64748b;
 
     --bg: #f0fdfa;
     --surface: #ffffff;
@@ -61,11 +73,12 @@
     --filter-red-dim: #fee2e2;
     --filter-red-strong: #dc2626;
 
-    --radius-lg: 16px;
-    --radius-md: 12px;
-    --radius-sm: 8px;
-    --shadow: 0 1px 2px rgba(19,78,74,0.06), 0 4px 12px rgba(19,78,74,0.05);
-    --shadow-lg: 0 8px 28px rgba(19,78,74,0.12);
+    /* 有机养生：更大更柔的圆角 */
+    --radius-lg: 22px;
+    --radius-md: 16px;
+    --radius-sm: 11px;
+    --shadow: 0 1px 2px rgba(19,78,74,0.05), 0 6px 20px rgba(19,78,74,0.06);
+    --shadow-lg: 0 16px 44px rgba(19,78,74,0.11);
   }
   [data-theme="dark"] {
     --primary: #22d3ee;
@@ -76,6 +89,13 @@
     --flag: #fbbf24;
     --flag-dim: #422006;
     --review: #60a5fa;
+
+    /* 分类语义色相（暗色：提亮以保 ≥4.5:1 对比） */
+    --cat-digit: #22d3ee;
+    --cat-path: #60a5fa;
+    --cat-animal: #fbbf24;
+    --cat-star: #f472b6;
+    --cat-blank: #94a3b8;
 
     --bg: #08201f;
     --surface: #0f2e2c;
@@ -93,12 +113,14 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
   body {
-    font-family: 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-    background: var(--bg); color: var(--fg); line-height: 1.55;
+    font-family: 'Raleway', 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg); color: var(--fg); line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     transition: background .25s ease, color .25s ease;
   }
-  h1, h2, h3, .font-head { font-family: 'Figtree', 'Noto Sans', sans-serif; }
+  h1, h2, h3, .font-head { font-family: 'Raleway', 'Noto Sans', sans-serif; }
+  /* 大字 hero 标题用 Lora 衬线，增添有机温度 */
+  .hero-title { font-family: 'Lora', 'Noto Sans', serif; }
 
   /* ---------------- Header ---------------- */
   header {
@@ -107,7 +129,7 @@
     display: flex; align-items: center; justify-content: space-between; gap: 16px;
     position: sticky; top: 0; z-index: 100;
   }
-  header .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  header .brand { display: flex; align-items: center; gap: 12px; min-width: 0; margin-right: auto; }
   header .logo {
     width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
     background: linear-gradient(135deg, var(--primary), var(--secondary));
@@ -121,20 +143,24 @@
   /* progress pill */
   .progress { display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--fg-muted); }
   .progress .stat { display: flex; align-items: center; gap: 5px; font-weight: 600; }
-  .progress .stat b { color: var(--fg); font-variant-numeric: tabular-nums; font-family: 'Figtree', sans-serif; }
+  .progress .stat b { color: var(--fg); font-variant-numeric: tabular-nums; font-family: 'Raleway', sans-serif; }
   .progress .dot { width: 8px; height: 8px; border-radius: 50%; }
   .progress .dot.rev { background: var(--review); }
   .progress .dot.edit { background: var(--accent); }
   .progress .dot.flag { background: var(--flag); }
-  .progress-bar { width: 120px; height: 6px; border-radius: 9999px; background: var(--surface-2); overflow: hidden; }
-  .progress-bar span { display: block; height: 100%; background: var(--review); border-radius: 9999px; transition: width .3s ease; }
+  /* 多段进度条：复核蓝 / 编辑绿 / 待核橙 分段叠放在中性轨道上 */
+  .progress-bar { position: relative; display: flex; width: 140px; height: 8px; border-radius: 9999px; background: var(--surface-2); overflow: hidden; }
+  .progress-bar .seg { height: 100%; transition: width .3s ease; min-width: 0; }
+  .progress-bar .seg.rev  { background: var(--review); }
+  .progress-bar .seg.edit { background: var(--accent); }
+  .progress-bar .seg.flag { background: var(--flag); }
   @media (max-width: 720px) { .progress-bar, .progress .label-txt { display: none; } }
 
   .ver-switch { display: flex; gap: 4px; background: var(--surface-2); padding: 4px; border-radius: 9999px; }
   .ver-switch button {
     border: none; background: transparent; padding: 6px 16px; border-radius: 9999px;
     font-size: 13px; font-weight: 600; color: var(--fg-muted); cursor: pointer;
-    font-family: 'Figtree', sans-serif; transition: all .2s ease;
+    font-family: 'Raleway', sans-serif; transition: all .2s ease;
   }
   .ver-switch button:hover { color: var(--fg); }
   .ver-switch button.active { background: var(--surface); color: var(--primary); box-shadow: var(--shadow); }
@@ -177,70 +203,197 @@
   .chip.active { background: var(--primary); border-color: var(--primary); color: #fff; }
   [data-theme="dark"] .chip.active { color: #08201f; }
   .chip .cnt { font-variant-numeric: tabular-nums; opacity: .75; font-weight: 700; }
+  /* 分类 chip 带一颗语义色点，激活时整枚染成对应色相 */
+  .chip[data-cat] .hue { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+  .chip[data-cat="digit"]  { --chip-hue: var(--cat-digit); }
+  .chip[data-cat="path"]   { --chip-hue: var(--cat-path); }
+  .chip[data-cat="animal"] { --chip-hue: var(--cat-animal); }
+  .chip[data-cat="star"]   { --chip-hue: var(--cat-star); }
+  .chip[data-cat="blank"]  { --chip-hue: var(--cat-blank); }
+  .chip[data-cat] .hue { background: var(--chip-hue, var(--fg-muted)); }
+  .chip[data-cat]:not([data-cat="all"]):hover { border-color: var(--chip-hue); color: var(--chip-hue); }
+  .chip[data-cat]:not([data-cat="all"]).active { background: var(--chip-hue); border-color: var(--chip-hue); color: #fff; }
+  .chip[data-cat].active .hue { background: #fff; }
+  [data-theme="dark"] .chip[data-cat]:not([data-cat="all"]).active { color: #08201f; }
+  [data-theme="dark"] .chip[data-cat].active .hue { background: #08201f; }
   .chip.flag.active { background: var(--flag); border-color: var(--flag); }
   .chip.edit.active { background: var(--accent); border-color: var(--accent); }
   .toolbar .spacer { flex: 1; }
 
-  /* ---------------- Layout: master-detail ---------------- */
-  main {
-    display: grid; grid-template-columns: 380px minmax(0,1fr);
-    gap: 0; align-items: start;
-  }
-  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  /* ---------------- Layout: 画廊 + 全屏详情 ---------------- */
+  main { display: block; }
 
-  /* Left rail: plate list */
-  .rail {
-    border-right: 1px solid var(--border);
-    position: sticky; top: 108px; height: calc(100vh - 108px);
-    overflow-y: auto; overscroll-behavior: contain;
-    background: var(--surface);
-  }
-  @media (max-width: 900px) { .rail { position: static; height: auto; max-height: 460px; border-right: none; border-bottom: 1px solid var(--border); } }
-  .rail-empty { padding: 40px 20px; text-align: center; color: var(--fg-muted); font-size: 13px; }
+  /* 视图切换：列表 / 详情 —— 三种外壳共用同一套 data-mview 机制
+     （移动外壳原本就用它，这里把它推广到 web 外壳，实现「全屏详情+返回」） */
+  [data-mview="detail"] .hero,
+  [data-mview="detail"] .toolbar { display: none; }
+  [data-mview="list"] .detail { display: none; }
+  [data-mview="detail"] .rail { display: none; }
 
-  .row {
-    display: grid; grid-template-columns: 52px 1fr auto; gap: 11px; align-items: center;
-    padding: 9px 14px; border-bottom: 1px solid var(--border); cursor: pointer;
-    transition: background .12s ease; position: relative;
+  /* Web 返回条：仅 web 外壳的详情视图显示（移动端用原生 app-bar 返回） */
+  .web-back { display: none; }
+  [data-shell="web"][data-mview="detail"] .web-back {
+    display: flex; align-items: center; gap: 14px;
+    position: sticky; top: 59px; z-index: 90;
+    padding: 10px clamp(14px, 3vw, 28px);
+    background: var(--bg); border-bottom: 1px solid var(--border);
   }
-  .row:hover { background: var(--surface-2); }
-  .row.active { background: var(--surface-2); }
-  .row.active::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--primary); }
-  .row-thumb {
-    width: 52px; height: 52px; border-radius: var(--radius-sm); overflow: hidden;
-    background: var(--surface-3); flex-shrink: 0;
+  .web-back .back-btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 9999px;
+    padding: 8px 16px; font-size: 14px; font-weight: 600; color: var(--fg); cursor: pointer;
+    font-family: 'Raleway', sans-serif; transition: all .2s ease;
   }
-  .row-thumb img { width: 100%; height: 100%; object-fit: cover; }
-  .row-main { min-width: 0; }
-  .row-top { display: flex; align-items: center; gap: 7px; margin-bottom: 3px; }
-  .row-page { font-family: 'Figtree', sans-serif; font-weight: 700; font-size: 13px; color: var(--fg); font-variant-numeric: tabular-nums; }
-  .row-cat {
-    font-size: 10.5px; font-weight: 700; padding: 1px 7px; border-radius: 9999px; letter-spacing: .02em;
+  .web-back .back-btn:hover { border-color: var(--primary); color: var(--primary); }
+  .web-back .back-btn:active { transform: scale(0.97); }
+  .web-back .back-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }
+  .web-back .back-btn svg { width: 18px; height: 18px; }
+  .web-back .wb-title { font-family: 'Raleway', sans-serif; font-weight: 700; font-size: 15px; color: var(--fg); }
+  .web-back .wb-sub { color: var(--fg-muted); font-weight: 500; font-size: 13px; margin-left: 6px; }
+
+  /* ---------------- Hero：大字动感标题区 ---------------- */
+  [data-shell="mobile"] .hero { display: none; }  /* 移动端用原生 app-bar，不叠 hero */
+  .hero {
+    position: relative; overflow: hidden;
+    padding: clamp(22px, 4vw, 46px) clamp(14px, 3vw, 28px) clamp(14px, 2vw, 22px);
+    border-bottom: 1px solid var(--border);
+    background:
+      radial-gradient(130% 150% at 0% 0%, color-mix(in srgb, var(--cat-star) 9%, transparent), transparent 46%),
+      radial-gradient(130% 150% at 100% 0%, color-mix(in srgb, var(--cat-digit) 10%, transparent), transparent 46%),
+      var(--bg);
   }
-  .cat-digit  { background: rgba(8,145,178,.14); color: var(--primary); }
-  .cat-path   { background: rgba(37,99,235,.14); color: var(--review); }
-  .cat-animal { background: rgba(217,119,6,.16); color: var(--flag); }
-  .cat-star   { background: rgba(219,39,119,.14); color: #db2777; }
-  .cat-blank  { background: var(--surface-3); color: var(--fg-muted); }
-  [data-theme="dark"] .cat-star { color: #f472b6; }
-  .row-info { font-size: 12.5px; color: var(--fg-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .row-info.blank { font-style: italic; opacity: .8; }
-  .row-status { display: flex; flex-direction: column; gap: 4px; align-items: center; }
-  .sdot { width: 8px; height: 8px; border-radius: 50%; }
+  /* 有机呼吸光晕：缓慢缩放漂移，克制、尊重 reduced-motion */
+  .hero::before {
+    content: ''; position: absolute; z-index: 0; inset: -30% -10% auto auto;
+    width: 46vw; height: 46vw; max-width: 520px; max-height: 520px; border-radius: 50%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--primary) 16%, transparent), transparent 70%);
+    filter: blur(30px); pointer-events: none;
+    animation: heroBreath 14s ease-in-out infinite;
+  }
+  .hero > * { position: relative; z-index: 1; }
+  @keyframes heroBreath { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-3%,4%) scale(1.08); } }
+  .hero-title {
+    font-family: 'Lora', 'Raleway', serif; font-weight: 700; line-height: 0.98;
+    font-size: clamp(30px, 7vw, 62px); letter-spacing: -0.02em; color: var(--fg);
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 0.26em;
+  }
+  .hero-title .w { display: inline-block; animation: heroRise 0.6s cubic-bezier(0.2, 0.75, 0.2, 1) both; }
+  .hero-title .acc { color: var(--primary); }
+  .hero-sub {
+    margin-top: 12px; font-family: 'Raleway', sans-serif; font-weight: 600;
+    font-size: clamp(11px, 1.5vw, 14px); letter-spacing: 0.26em; text-transform: uppercase;
+    color: var(--fg-muted); animation: heroFade 0.7s ease 0.4s both;
+  }
+  @keyframes heroRise { from { opacity: 0; transform: translateY(0.55em) rotate(-3deg); } to { opacity: 1; transform: none; } }
+  @keyframes heroFade { from { opacity: 0; } to { opacity: 1; } }
+
+  /* ---------------- 画廊网格 ---------------- */
+  .rail { padding: clamp(14px, 2.4vw, 26px) clamp(14px, 3vw, 28px) 64px; }
+  .rail-grid {
+    display: grid; gap: clamp(12px, 1.6vw, 18px);
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  }
+  @media (max-width: 768px) { .rail-grid { grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); } }
+  @media (max-width: 420px) { .rail-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; } }
+  .rail-empty { padding: 64px 20px; text-align: center; color: var(--fg-muted); font-size: 14px; }
+
+  /* 画廊卡片：中性缩略图 + 顶部撞色条 + 大字页码 + 图标文字分类 */
+  .card-item {
+    position: relative; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); overflow: hidden; cursor: pointer; text-align: left;
+    padding: 0; font-family: inherit; color: var(--fg); box-shadow: var(--shadow);
+    display: flex; flex-direction: column;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    animation: cardIn .4s ease both;
+  }
+  .card-item:hover { box-shadow: var(--shadow-lg); border-color: color-mix(in srgb, var(--ci-hue) 45%, var(--border)); transform: translateY(-2px); }
+  .card-item:active { transform: scale(0.97); }
+  .card-item:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }
+  .card-item.active { border-color: var(--ci-hue); box-shadow: 0 0 0 2px var(--ci-hue), var(--shadow); }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+  /* 分类色相绑定到卡片（玫红/青/靛/橙/灰） */
+  .card-item[data-cat="digit"]  { --ci-hue: var(--cat-digit); }
+  .card-item[data-cat="path"]   { --ci-hue: var(--cat-path); }
+  .card-item[data-cat="animal"] { --ci-hue: var(--cat-animal); }
+  .card-item[data-cat="star"]   { --ci-hue: var(--cat-star); }
+  .card-item[data-cat="blank"]  { --ci-hue: var(--cat-blank); }
+
+  .ci-thumb { position: relative; aspect-ratio: 1 / 1; background: var(--surface-3); overflow: hidden; }
+  .ci-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .ci-thumb::after { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: var(--ci-hue); }
+  .ci-status { position: absolute; top: 8px; right: 8px; display: flex; gap: 4px; align-items: center; }
+  .ci-status .sdot { width: 9px; height: 9px; border-radius: 50%; box-shadow: 0 0 0 2px var(--surface); }
+  .ci-status .rev-check {
+    width: 20px; height: 20px; padding: 3px; border-radius: 50%; color: #fff; background: var(--review);
+    box-shadow: 0 0 0 2px var(--surface);
+  }
+  [data-theme="dark"] .ci-status .rev-check { color: #08201f; }
+
+  .ci-body { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 6px; }
+  .ci-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .ci-page { font-family: 'Raleway', sans-serif; font-weight: 700; font-size: 22px; color: var(--fg); font-variant-numeric: tabular-nums; line-height: 1; }
+  .ci-cat {
+    display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;
+    font-size: 11px; font-weight: 700; padding: 3px 9px 3px 7px; border-radius: 9999px;
+    background: color-mix(in srgb, var(--ci-hue) 15%, transparent); color: var(--ci-hue);
+  }
+  .ci-cat svg { width: 13px; height: 13px; }
+  .ci-info { font-size: 12.5px; color: var(--fg-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ci-info.blank { font-style: italic; opacity: .8; }
+
+  /* 状态点色值（画廊卡角标复用） */
   .sdot.flag { background: var(--flag); }
   .sdot.edit { background: var(--accent); }
   .sdot.rev  { background: var(--review); }
-  .row-status .rev-check { width: 15px; height: 15px; color: var(--review); }
 
-  /* Right detail */
+  /* 详情头部：分类徽标（图标+文字，色盲友好） */
+  .detail-cat {
+    display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0;
+    font-size: 12px; font-weight: 700; padding: 4px 11px 4px 9px; border-radius: 9999px;
+    background: color-mix(in srgb, var(--dc-hue, var(--primary)) 15%, transparent); color: var(--dc-hue, var(--primary));
+  }
+  .detail-cat svg { width: 14px; height: 14px; }
+  .detail-cat[data-cat="digit"]  { --dc-hue: var(--cat-digit); }
+  .detail-cat[data-cat="path"]   { --dc-hue: var(--cat-path); }
+  .detail-cat[data-cat="animal"] { --dc-hue: var(--cat-animal); }
+  .detail-cat[data-cat="star"]   { --dc-hue: var(--cat-star); }
+  .detail-cat[data-cat="blank"]  { --dc-hue: var(--cat-blank); }
+
+  /* Right detail — 窄屏/移动：竖排卡片流（保底布局） */
   .detail { padding: clamp(16px, 2.4vw, 28px); display: flex; flex-direction: column; gap: 18px; max-width: 900px; margin: 0 auto; width: 100%; }
+
+  /* 桌面 Bento 网格：色卡舞台占最大格，遮罩/关键信息/导航/导出各占独立格，一屏看全不滚动 */
+  @media (min-width: 1024px) {
+    [data-shell="web"] .detail {
+      display: grid; max-width: none; gap: 16px;
+      grid-template-columns: minmax(0, 1.7fr) minmax(320px, 1fr);
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      grid-template-areas:
+        "stage mask"
+        "stage info"
+        "nav   export";
+      height: calc(100vh - 118px);  /* 顶栏 59 + web 返回条 ~57 */
+    }
+    [data-shell="web"] .detail .bento-stage  { grid-area: stage; display: flex; flex-direction: column; min-height: 0; }
+    [data-shell="web"] .detail .bento-mask   { grid-area: mask; }
+    [data-shell="web"] .detail .bento-info   { grid-area: info; display: flex; flex-direction: column; min-height: 0; }
+    [data-shell="web"] .detail .bento-nav    { grid-area: nav; }
+    [data-shell="web"] .detail .bento-export { grid-area: export; }
+    /* 舞台卡内部撑满，图片区吃掉剩余高度 */
+    [data-shell="web"] .detail .bento-stage .plate-stage { flex: 1; margin-top: 12px; min-height: 240px; }
+    [data-shell="web"] .detail .bento-stage .plate-stage img { max-height: 100%; width: auto; max-width: 100%; }
+    /* 信息编辑格：textarea 吃掉剩余高度，动作栏贴底 */
+    [data-shell="web"] .detail .bento-info textarea { flex: 1; min-height: 60px; }
+    [data-shell="web"] .detail .bento-info .info-actions { margin-top: auto; }
+  }
 
   .card {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--radius-lg); box-shadow: var(--shadow);
   }
   .section-label {
-    font-family: 'Figtree', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+    font-family: 'Raleway', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
     text-transform: uppercase; color: var(--fg-muted); display: flex; align-items: center; gap: 8px;
   }
   .section-label svg { width: 15px; height: 15px; }
@@ -248,7 +401,7 @@
   /* Detail head */
   .detail-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
   .detail-head .titlebox { display: flex; align-items: center; gap: 10px; min-width: 0; }
-  .detail-head .plate-name { font-family: 'Figtree', sans-serif; font-size: 17px; font-weight: 700; color: var(--fg); }
+  .detail-head .plate-name { font-family: 'Raleway', sans-serif; font-size: 17px; font-weight: 700; color: var(--fg); }
   .tag { background: var(--surface-2); color: var(--fg-muted); padding: 5px 12px; border-radius: 9999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
   .flag-badge {
     display: none; align-items: center; gap: 6px; background: var(--flag-dim); color: var(--flag);
@@ -284,7 +437,7 @@
   .mask-buttons { display: flex; gap: 10px; }
   .mask-btn {
     flex: 1; border: 1.5px solid transparent; padding: 12px; border-radius: var(--radius-sm);
-    font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Figtree', sans-serif; transition: all .2s ease;
+    font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Raleway', sans-serif; transition: all .2s ease;
     display: flex; align-items: center; justify-content: center; gap: 8px;
   }
   .mask-btn .swatch { width: 12px; height: 12px; border-radius: 50%; }
@@ -327,7 +480,7 @@
   .info-actions { display: flex; gap: 10px; align-items: center; margin-top: 12px; flex-wrap: wrap; }
   .btn {
     border: none; padding: 10px 20px; border-radius: 9999px; cursor: pointer; font-size: 14px; font-weight: 600;
-    font-family: 'Figtree', sans-serif; transition: all .2s ease; display: inline-flex; align-items: center; gap: 6px;
+    font-family: 'Raleway', sans-serif; transition: all .2s ease; display: inline-flex; align-items: center; gap: 6px;
   }
   .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }
   .btn svg { width: 16px; height: 16px; }
@@ -348,7 +501,7 @@
   .nav-card { padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
   .nav-btn {
     background: var(--bg); border: 1px solid var(--border); border-radius: 9999px; padding: 9px 16px;
-    font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Figtree', sans-serif; color: var(--fg);
+    font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Raleway', sans-serif; color: var(--fg);
     transition: all .2s ease; display: inline-flex; align-items: center; gap: 6px;
   }
   .nav-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
@@ -357,7 +510,7 @@
   .nav-btn svg { width: 16px; height: 16px; }
   .nav-btn.flag-jump { background: var(--flag-dim); color: var(--flag); border-color: transparent; }
   .nav-btn.flag-jump:hover:not(:disabled) { color: var(--flag); border-color: var(--flag); }
-  .counter { font-family: 'Figtree', sans-serif; font-size: 14px; font-weight: 600; color: var(--fg-muted); font-variant-numeric: tabular-nums; }
+  .counter { font-family: 'Raleway', sans-serif; font-size: 14px; font-weight: 600; color: var(--fg-muted); font-variant-numeric: tabular-nums; }
   .counter .cur { color: var(--primary); font-size: 18px; }
 
   /* Export */
@@ -365,13 +518,16 @@
   .export-row .section-label { margin-right: auto; }
   .btn-export {
     background: var(--bg); color: var(--fg); border: 1px solid var(--border); padding: 9px 14px; border-radius: var(--radius-sm);
-    font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Figtree', sans-serif; transition: all .2s ease;
+    font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Raleway', sans-serif; transition: all .2s ease;
     display: inline-flex; align-items: center; gap: 7px;
   }
   .btn-export:hover { border-color: var(--primary); color: var(--primary); background: var(--surface-2); }
   .btn-export svg { width: 15px; height: 15px; }
 
-  @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; scroll-behavior: auto !important; animation: none !important; }
+    .hero-title .w, .hero-sub, .card-item { opacity: 1 !important; transform: none !important; }
+  }
 
   /* ================================================================
      平台自适应外壳 · Platform-adaptive shell
@@ -417,7 +573,7 @@
     --flag-dim: #3a2a00;
   }
   [data-platform="ios"] h1, [data-platform="ios"] h2, [data-platform="ios"] .font-head,
-  [data-platform="ios"] .row-page, [data-platform="ios"] .counter, [data-platform="ios"] .btn,
+  [data-platform="ios"] .ci-page, [data-platform="ios"] .hero-title, [data-platform="ios"] .counter, [data-platform="ios"] .btn,
   [data-platform="ios"] .nav-btn, [data-platform="ios"] .mask-btn, [data-platform="ios"] .plate-name {
     font-family: -apple-system, 'SF Pro Display', 'PingFang SC', sans-serif;
     letter-spacing: -0.01em;
@@ -584,11 +740,10 @@
   /* 详情视图下顶栏标题居中，列表视图标题靠左给版本切换让位 */
   [data-shell="mobile"][data-mview="list"] .ab-title { text-align: left; }
 
-  /* 移动端触摸目标更大、列表行更舒展 */
-  [data-shell="mobile"] .row { padding: 12px 16px; grid-template-columns: 60px 1fr auto; }
-  [data-shell="mobile"] .row-thumb { width: 60px; height: 60px; }
+  /* 移动端触摸目标更大、画廊卡片更舒展 */
   [data-shell="mobile"] .nav-btn, [data-shell="mobile"] .btn { min-height: 44px; }
   [data-shell="mobile"] .mask-btn { min-height: 52px; }
+  [data-shell="mobile"] .card-item:hover { transform: none; }  /* 触屏无 hover 位移，避免粘滞 */
 </style>
 </head>
 <body>
@@ -617,7 +772,11 @@
   </div>
   <div class="head-actions">
     <div class="progress" id="progress">
-      <div class="progress-bar" title="复核进度"><span id="progFill" style="width:0%"></span></div>
+      <div class="progress-bar" title="复核进度（蓝=已复核 · 绿=已编辑未复核 · 橙=待复核）">
+        <span class="seg rev" id="segRev" style="width:0%"></span>
+        <span class="seg edit" id="segEdit" style="width:0%"></span>
+        <span class="seg flag" id="segFlag" style="width:0%"></span>
+      </div>
       <span class="stat"><span class="dot rev"></span><b id="statRev">0</b><span class="label-txt">复核</span></span>
       <span class="stat"><span class="dot edit"></span><b id="statEdit">0</b><span class="label-txt">编辑</span></span>
       <span class="stat"><span class="dot flag"></span><b id="statFlag">0</b><span class="label-txt">待核</span></span>
@@ -636,6 +795,12 @@
   </div>
 </header>
 
+<!-- Hero：大字动感标题区（仅列表视图，移动外壳隐藏） -->
+<section class="hero" id="hero" aria-hidden="true">
+  <h2 class="hero-title" id="heroTitle"></h2>
+  <div class="hero-sub">Color Vision Plate · Review Console</div>
+</section>
+
 <div class="toolbar">
   <div class="search">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
@@ -643,11 +808,11 @@
   </div>
   <div class="chips" id="catChips">
     <button class="chip active" data-cat="all">全部 <span class="cnt" data-cnt="all">0</span></button>
-    <button class="chip" data-cat="digit">数字 <span class="cnt" data-cnt="digit">0</span></button>
-    <button class="chip" data-cat="path">路径 <span class="cnt" data-cnt="path">0</span></button>
-    <button class="chip" data-cat="animal">动物 <span class="cnt" data-cnt="animal">0</span></button>
-    <button class="chip" data-cat="star">星形 <span class="cnt" data-cnt="star">0</span></button>
-    <button class="chip" data-cat="blank">空白 <span class="cnt" data-cnt="blank">0</span></button>
+    <button class="chip" data-cat="digit"><span class="hue"></span>数字 <span class="cnt" data-cnt="digit">0</span></button>
+    <button class="chip" data-cat="path"><span class="hue"></span>路径 <span class="cnt" data-cnt="path">0</span></button>
+    <button class="chip" data-cat="animal"><span class="hue"></span>动物 <span class="cnt" data-cnt="animal">0</span></button>
+    <button class="chip" data-cat="star"><span class="hue"></span>星形 <span class="cnt" data-cnt="star">0</span></button>
+    <button class="chip" data-cat="blank"><span class="hue"></span>空白 <span class="cnt" data-cnt="blank">0</span></button>
   </div>
   <div class="spacer"></div>
   <div class="chips">
@@ -656,14 +821,24 @@
   </div>
 </div>
 
+<!-- Web 外壳详情返回条（移动端用原生 app-bar，此条不显示） -->
+<div class="web-back" id="webBack">
+  <button class="back-btn" id="webBackBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+    返回列表
+  </button>
+  <span class="wb-title" id="wbTitle">—<span class="wb-sub" id="wbSub"></span></span>
+</div>
+
 <main>
   <div class="rail" id="rail"></div>
 
   <div class="detail">
-    <div class="card plate-card">
+    <div class="card plate-card bento-stage">
       <div class="detail-head">
         <div class="titlebox">
           <span class="plate-name" id="plateName">—</span>
+          <span class="detail-cat" id="detailCat" hidden></span>
           <span class="tag" id="plateTag">—</span>
         </div>
         <span class="flag-badge" id="flagBadge">
@@ -677,7 +852,7 @@
       </div>
     </div>
 
-    <div class="card pad">
+    <div class="card pad bento-mask">
       <div class="mask-head">
         <div class="section-label">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -710,7 +885,7 @@
       </div>
     </div>
 
-    <div class="card pad info-editor">
+    <div class="card pad info-editor bento-info">
       <div class="section-label">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
         图像关键信息 / Key Figure
@@ -730,7 +905,7 @@
       </div>
     </div>
 
-    <div class="card nav-card">
+    <div class="card nav-card bento-nav">
       <button class="nav-btn" id="btnPrev">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>上一张
       </button>
@@ -743,7 +918,7 @@
       </button>
     </div>
 
-    <div class="card pad">
+    <div class="card pad bento-export">
       <div class="export-row">
         <div class="section-label">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
@@ -806,6 +981,20 @@
   var view = [];   // filtered+sorted list currently shown
   var idx = 0;
 
+  // Phosphor 风格矢量图标（内联，无 CDN/字体依赖，离线部署可用）。
+  // 分类同时用「图标 + 文字」标注，颜色不作为唯一信息（色盲友好）。
+  var ICONS = {
+    digit:  '<path d="M9 8h2.2v8M8.5 16h5"/>',                                         // 数字（示意 "1"）
+    path:   '<path d="M4 18c4 0 4-12 8-12s4 12 8 12"/>',                                // 路径/轨迹曲线
+    animal: '<path d="M5 11a3 3 0 0 1 6 0v1M13 12v-1a3 3 0 0 1 6 0M4 8.5 6 7M20 8.5 18 7M8 15h8a3 3 0 0 1-3 3h-2a3 3 0 0 1-3-3z"/>',
+    star:   '<path d="M12 4l2.3 5 5.4.5-4.1 3.6 1.3 5.3L12 20.9 7.1 18.4l1.3-5.3L4.3 9.5 9.7 9z"/>',
+    blank:  '<circle cx="12" cy="12" r="7" stroke-dasharray="2.6 2.8"/>'
+  };
+  function catIcon(cat) {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+           'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[cat] || ICONS.blank) + '</svg>';
+  }
+
   var CAT_META = {
     digit:  { label: '数字',  cls: 'cat-digit' },
     path:   { label: '路径',  cls: 'cat-path' },
@@ -815,7 +1004,9 @@
   };
 
   var el = {
-    progFill: document.getElementById('progFill'),
+    segRev: document.getElementById('segRev'),
+    segEdit: document.getElementById('segEdit'),
+    segFlag: document.getElementById('segFlag'),
     statRev: document.getElementById('statRev'),
     statEdit: document.getElementById('statEdit'),
     statFlag: document.getElementById('statFlag'),
@@ -829,8 +1020,15 @@
     cntFlag: document.getElementById('cntFlag'),
     cntEdit: document.getElementById('cntEdit'),
     rail: document.getElementById('rail'),
+    heroTitle: document.getElementById('heroTitle'),
     plateName: document.getElementById('plateName'),
     plateTag: document.getElementById('plateTag'),
+    detailCat: document.getElementById('detailCat'),
+    webBack: document.getElementById('webBack'),
+    webBackBtn: document.getElementById('webBackBtn'),
+    webBackTitle: document.getElementById('wbTitle'),
+    wbSub: document.getElementById('wbSub'),
+    wbSub: document.getElementById('wbSub'),
     plateImg: document.getElementById('plateImg'),
     flagBadge: document.getElementById('flagBadge'),
     globalMask: document.getElementById('globalMask'),
@@ -901,14 +1099,16 @@
   el.themeToggle.addEventListener('click', toggleTheme);
   if (el.abTheme) el.abTheme.addEventListener('click', toggleTheme);
 
-  // ---------------- 移动 App 外壳 ----------------
+  // ---------------- 视图切换（列表 / 详情）：三种外壳共用 ----------------
+  // web 外壳原本是并排 master-detail，现统一为「全屏详情+返回」，与移动端同一套 data-mview
   var mview = 'list';  // list | detail
   function setMview(v) {
     var was = mview;
     mview = v;
     root.setAttribute('data-mview', v);
     syncAppBar();
-    syncTabBar();
+    syncWebBack();
+    if (IS_MOBILE) syncTabBar();
     if (v === 'detail') {
       window.scrollTo(0, 0);
       // 进入详情时压入历史，安卓返回键/浏览器后退可回到列表
@@ -922,6 +1122,15 @@
       el.abTitle.textContent = '第 ' + p.page + ' 张 · ' + p.ver.toUpperCase();
     } else {
       el.abTitle.textContent = '色卡复核台';
+    }
+  }
+  function syncWebBack() {
+    // web 外壳详情返回条的标题（移动端不显示此条）
+    if (IS_MOBILE || !el.webBackTitle) return;
+    var p = view[idx];
+    if (p) {
+      el.webBackTitle.firstChild.textContent = '第 ' + p.page + ' 张';
+      if (el.wbSub) el.wbSub.textContent = ' · ' + p.ver.toUpperCase();
     }
   }
   function syncTabBar() {
@@ -992,7 +1201,18 @@
     el.statRev.textContent = rev;
     el.statEdit.textContent = ed;
     el.statFlag.textContent = fl;
-    el.progFill.style.width = vl.length ? (rev / vl.length * 100).toFixed(1) + '%' : '0%';
+    // 三段进度条互斥叠放：已复核(蓝) + 已编辑未复核(绿) + 待核未复核(橙)，
+    // 剩余为中性轨道。分母为该版本色卡总数，三段相加不超过 100%
+    var n = vl.length || 1;
+    var revN = 0, editN = 0, flagN = 0;
+    vl.forEach(function (p) {
+      if (isReviewed(p)) { revN++; return; }
+      if (isFlagged(p)) { flagN++; return; }
+      if (isEdited(p)) { editN++; }
+    });
+    el.segRev.style.width  = (revN / n * 100).toFixed(2) + '%';
+    el.segEdit.style.width = (editN / n * 100).toFixed(2) + '%';
+    el.segFlag.style.width = (flagN / n * 100).toFixed(2) + '%';
 
     // chip counts (respect version only, not other filters — reflects data pool)
     var byCat = { all: vl.length, digit: 0, path: 0, animal: 0, star: 0, blank: 0 };
@@ -1005,7 +1225,7 @@
     el.cntEdit.textContent = ed;
   }
 
-  // ---------------- 列表渲染 ----------------
+  // ---------------- 列表渲染：画廊网格 ----------------
   function buildRail() {
     computeView();
     el.rail.innerHTML = '';
@@ -1017,29 +1237,39 @@
       el.rail.appendChild(e);
       return;
     }
+    var grid = document.createElement('div');
+    grid.className = 'rail-grid';
     view.forEach(function (p, i) {
       var cat = categorize(p);
       var meta = CAT_META[cat];
       var info = currentInfo(p);
       var blankCls = cat === 'blank' ? ' blank' : '';
-      var row = document.createElement('div');
-      row.className = 'row' + (i === idx ? ' active' : '');
-      row.setAttribute('data-i', i);
+      var card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'card-item' + (i === idx ? ' active' : '');
+      card.setAttribute('data-i', i);
+      card.setAttribute('data-cat', cat);
+      // 30–50ms 逐项 stagger 入场（上限 20 项，避免长列表末尾等待过久）
+      card.style.animationDelay = Math.min(i, 20) * 0.04 + 's';
       var status = '';
       if (isFlagged(p)) status += '<span class="sdot flag" title="待复核"></span>';
       if (isEdited(p))  status += '<span class="sdot edit" title="已编辑"></span>';
       if (isReviewed(p)) status += '<svg class="rev-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
-      row.innerHTML =
-        '<div class="row-thumb"><img loading="lazy" src="' + p.file + '" alt=""></div>' +
-        '<div class="row-main">' +
-          '<div class="row-top"><span class="row-page">#' + p.page + '</span>' +
-          '<span class="row-cat ' + meta.cls + '">' + meta.label + '</span></div>' +
-          '<div class="row-info' + blankCls + '">' + escapeHtml(info) + '</div>' +
+      card.innerHTML =
+        '<div class="ci-thumb"><img loading="lazy" src="' + p.file + '" alt="">' +
+          '<div class="ci-status">' + status + '</div>' +
         '</div>' +
-        '<div class="row-status">' + status + '</div>';
-      row.addEventListener('click', function () { idx = i; if (IS_MOBILE) setMview('detail'); render(); });
-      el.rail.appendChild(row);
+        '<div class="ci-body">' +
+          '<div class="ci-top">' +
+            '<span class="ci-page">' + p.page + '</span>' +
+            '<span class="ci-cat">' + catIcon(cat) + meta.label + '</span>' +
+          '</div>' +
+          '<div class="ci-info' + blankCls + '">' + escapeHtml(info) + '</div>' +
+        '</div>';
+      card.addEventListener('click', function () { idx = i; setMview('detail'); render(); });
+      grid.appendChild(card);
     });
+    el.rail.appendChild(grid);
   }
 
   function escapeHtml(s) {
@@ -1049,13 +1279,16 @@
   }
 
   function highlightRail() {
-    Array.prototype.forEach.call(el.rail.children, function (c) {
+    Array.prototype.forEach.call(el.rail.querySelectorAll('.card-item'), function (c) {
       var i = parseInt(c.getAttribute('data-i'), 10);
       if (isNaN(i)) return;
       c.classList.toggle('active', i === idx);
     });
-    var active = el.rail.querySelector('.row.active');
-    if (active) active.scrollIntoView({ block: 'nearest' });
+    // 仅在列表视图时滚动到激活项（详情视图列表已隐藏，滚动无意义）
+    if (mview === 'list') {
+      var active = el.rail.querySelector('.card-item.active');
+      if (active) active.scrollIntoView({ block: 'nearest' });
+    }
   }
 
   // ---------------- 详情渲染 ----------------
@@ -1071,6 +1304,7 @@
       el.detectedVal.textContent = '—';
       el.curIdx.textContent = '0';
       el.flagBadge.classList.remove('show');
+      if (el.detailCat) el.detailCat.hidden = true;
       return;
     }
     el.plateName.textContent = p.file.split('/').pop().replace('.png', '');
@@ -1082,9 +1316,18 @@
     el.btnPrev.disabled = idx === 0;
     el.btnNext.disabled = idx === view.length - 1;
     el.flagBadge.classList.toggle('show', isFlagged(p));
+    // 详情头部分类徽标：图标 + 文字（色盲友好，色相仅作辅助）
+    if (el.detailCat) {
+      var cat = categorize(p), meta = CAT_META[cat];
+      el.detailCat.setAttribute('data-cat', cat);
+      el.detailCat.innerHTML = catIcon(cat) + '<span>' + meta.label + '</span>';
+      el.detailCat.hidden = false;
+    }
     updateReviewBtn(p);
     highlightRail();
+    // 视图同步：移动端刷新原生外壳，web 端刷新返回条标题
     if (IS_MOBILE) { syncAppBar(); syncTabBar(); syncFab(p); }
+    else { syncWebBack(); }
   }
 
   function updateReviewBtn(p) {
@@ -1248,8 +1491,8 @@
     idx = 0;
     syncVerSwitch();
     updateStats(); buildRail(); render();
-    // 移动端切版本后回到列表视图，方便直接浏览新版本
-    if (IS_MOBILE) setMview('list');
+    // 切版本后回到列表视图，方便直接浏览新版本（三种外壳统一）
+    setMview('list');
   }
   [el.verSwitch, el.verSwitchM].forEach(function (sw) {
     if (!sw) return;
@@ -1258,7 +1501,18 @@
     });
   });
 
-  // ---------------- 移动外壳交互：标签栏 / 返回 / FAB ----------------
+  // ---------------- 视图返回 / 历史（三种外壳共用） ----------------
+  // web 返回条 + 移动 app-bar 返回 都回到列表视图
+  if (el.webBackBtn) el.webBackBtn.addEventListener('click', function () { setMview('list'); });
+  if (el.mobileBack) el.mobileBack.addEventListener('click', function () { setMview('list'); });
+  // 浏览器后退 / 安卓物理返回键：详情页优先返回列表（web 端亦生效）
+  window.addEventListener('popstate', function () {
+    if (mview === 'detail') { setMview('list'); history.pushState({ mview: 'list' }, ''); }
+  });
+  if (window.history) { history.replaceState({ mview: 'list' }, ''); }
+  setMview('list');
+
+  // ---------------- 移动外壳专属交互：底部标签栏 / FAB ----------------
   if (IS_MOBILE) {
     // 底部标签栏
     if (el.tabBar) {
@@ -1283,21 +1537,28 @@
         });
       });
     }
-    // 返回按钮：详情 -> 列表
-    if (el.mobileBack) {
-      el.mobileBack.addEventListener('click', function () { setMview('list'); });
-    }
     // Android FAB：标记/取消复核
     if (el.fab) {
       el.fab.addEventListener('click', function () { el.btnReview.click(); });
     }
-    // 安卓物理返回键 / 浏览器后退：详情页优先返回列表
-    window.addEventListener('popstate', function () {
-      if (mview === 'detail') { setMview('list'); history.pushState({ mview: 'list' }, ''); }
-    });
-    history.replaceState({ mview: 'list' }, '');
-    setMview('list');
   }
+
+  // ---------------- Hero 大字标题：逐字 stagger 入场 ----------------
+  (function buildHero() {
+    if (!el.heroTitle) return;
+    // 「色卡 复核 台」——「复核」为强调色；每个词一个 span，动画延迟递增
+    var words = [
+      { t: '色卡', acc: false },
+      { t: '复核', acc: true },
+      { t: '台',   acc: false }
+    ];
+    var html = '';
+    words.forEach(function (w, i) {
+      html += '<span class="w' + (w.acc ? ' acc' : '') + '" style="animation-delay:' +
+              (i * 0.08).toFixed(2) + 's">' + w.t + '</span>';
+    });
+    el.heroTitle.innerHTML = html;
+  })();
 
   // ---------------- 初始化 ----------------
   updateStats();
